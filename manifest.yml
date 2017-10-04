@@ -1,7 +1,7 @@
 applications:
 - disk_quota: 1024M
-  host: itucsdb15
-  name: itucsdb15
+  host: cookbook
+  name: cookbook
   path: .
   domain: mybluemix.net
   instances: 1
