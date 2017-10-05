@@ -61,4 +61,8 @@ docs/_build/
 target/
 
 # Vagrant
-.vagrant/
+.vagrant
+
+# DS_Store
+.DS_Store
+/
