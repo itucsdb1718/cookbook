@@ -1,5 +1,6 @@
 import os
-from views import app
+
+from cookbook import app
 
 
 if __name__ == '__main__':

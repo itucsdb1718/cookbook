@@ -1,7 +1,15 @@
 import datetime
-from urls import app
-from flask import render_template
 
+from flask import render_template, redirect
+from flask.helpers import url_for
+
+from cookbook import app
+from .models import create_db
+
+@app.endpoint('initdb')
+def initdb():
+    create_db()
+    return redirect(url_for('home_page'))
 
 @app.endpoint('home_page')
 def home_page():

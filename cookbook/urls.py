@@ -1,9 +1,9 @@
-from flask import Flask
-from werkzeug.routing import Map, Rule
+from werkzeug.routing import Rule
 
-app = Flask(__name__)
+from cookbook import app
 
 url_map = [
+    Rule('/initdb', endpoint='initdb'),
     Rule('/', endpoint='home_page'),
     Rule('/profile/', endpoint='profile_page'),
     Rule('/recipes/', endpoint='recipes_page'),
