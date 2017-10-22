@@ -6,7 +6,8 @@
 
 body {
   font-family: "Open Sans", Helvetica, Arial, sans-serif;
-  background: "{{ url_for('static', filename='images/bg.jpg') }}" no-repeat center center fixed;
+  background: no-repeat center center fixed;
+  background-image: "images/background-.jpg";
   -webkit-background-size: cover;
   -moz-background-size: cover;
   background-size: cover;
