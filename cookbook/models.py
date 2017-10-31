@@ -8,35 +8,86 @@ dsn = """user='{}' password='{}' host='{}' port={}
 
 app.config['dsn'] = dsn
 
+class Ingredient:
+    @staticmethod
+    def create_tables():
+        with dbapi2.connect(app.config['dsn']) as connection:
+            cursor = connection.cursor()
+
+            query = """DROP TABLE IF EXISTS ingredient_list CASCADE"""
+            cursor.execute(query)
+
+            query = """CREATE TABLE ingredient_list (
+                                    id SERIAL PRIMARY KEY,
+                                    name VARCHAR(50)
+                                    );"""
+            cursor.execute(query)
+
+            query = """DROP TABLE IF EXISTS ingredient CASCADE"""
+            cursor.execute(query)
+
+            query = """CREATE TABLE ingredient (
+                                  id SERIAL,
+                                  name VARCHAR(50),
+                                  amount VARCHAR(10),
+                                  list_id INTEGER REFERENCES ingredient_list (id),
+                                  PRIMARY KEY (id)
+                               );"""
+            cursor.execute(query)
+
+            query = """INSERT INTO ingredient_list (name) VALUES ('domates')"""
+            cursor.execute(query)
+            query = """INSERT INTO ingredient (id, name, amount) VALUES (12, 'domates', '5kg')"""
+            cursor.execute(query)
+            query = """INSERT INTO ingredient (id, name, amount) VALUES (13, 'limon', '10kg')"""
+            cursor.execute(query)
+            query = """INSERT INTO ingredient (id, name, amount) VALUES (14, 'aasd', '2kg')"""
+            cursor.execute(query)
+
+            connection.commit()
+
+    @staticmethod
+    def get(name):
+        with dbapi2.connect(app.config['dsn']) as connection:
+            cursor = connection.cursor()
+
+            query = """SELECT * FROM ingredient WHERE (name = %s)"""
+            cursor.execute(query, [name])
+            return cursor.fetchall()
+
+
+class Recipe:
+    @staticmethod
+    def create_tables():
+        with dbapi2.connect(app.config['dsn']) as connection:
+            cursor = connection.cursor()
+
+            query = """DROP TABLE IF EXISTS recipe"""
+            cursor.execute(query)
+
+            query = """CREATE TABLE recipe (
+                          id SERIAL,
+                          name VARCHAR(100),
+                          description VARCHAR(1000),
+                          ingredient_id INTEGER REFERENCES ingredient,
+                          PRIMARY KEY (id)
+                       );"""
+            cursor.execute(query)
+            connection.commit()
+
+    @staticmethod
+    def get(name):
+        with dbapi2.connect(app.config['dsn']) as connection:
+            cursor = connection.cursor()
+
+            query = """SELECT * FROM recipe WHERE (name = %s)"""
+            cursor.execute(query, [name])
+            return cursor.fetchall()
+
 
 def create_db():
     with dbapi2.connect(app.config['dsn']) as connection:
         cursor = connection.cursor()
-
-        query = """DROP TABLE IF EXISTS ingredient CASCADE"""
-        cursor.execute(query)
-
-        query = """CREATE TABLE ingredient (
-                              id SERIAL,
-                              name VARCHAR(50),
-                              PRIMARY KEY (id)
-                           );"""
-        cursor.execute(query)
-
-        query = """DROP TABLE IF EXISTS recipe"""
-        cursor.execute(query)
-
-        query = """CREATE TABLE recipe (
-                      id SERIAL,
-                      name VARCHAR(100),
-                      description VARCHAR(1000),
-                      ingredient_id INTEGER REFERENCES ingredient,
-                      PRIMARY KEY (id)
-                   );"""
-        cursor.execute(query)
-
-        query = """INSERT INTO ingredient (name) VALUES ('domates')"""
-        cursor.execute(query)
 
         query = """DROP TABLE IF EXISTS cookbook_user"""
         cursor.execute(query)
@@ -57,11 +108,10 @@ def create_db():
         query = """CREATE TABLE cookbook_page (
                       id SERIAL,
                       name VARCHAR(50) NOT NULL,
-                      admin_user_id INTEGER REFERENCES cookbook_user, 
+                      admin_user_id INTEGER REFERENCES cookbook_user,
                       password CHAR(40) NOT NULL,
                       PRIMARY KEY (id)
                       );"""
-
         cursor.execute(query)
 
         connection.commit()
