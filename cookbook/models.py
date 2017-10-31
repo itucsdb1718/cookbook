@@ -10,7 +10,7 @@ app.config['dsn'] = dsn
 
 class Ingredient:
     @staticmethod
-    def create_tables():
+    def create_table():
         with dbapi2.connect(app.config['dsn']) as connection:
             cursor = connection.cursor()
 
@@ -58,7 +58,7 @@ class Ingredient:
 
 class Recipe:
     @staticmethod
-    def create_tables():
+    def create_table():
         with dbapi2.connect(app.config['dsn']) as connection:
             cursor = connection.cursor()
 
