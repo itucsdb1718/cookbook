@@ -85,33 +85,59 @@ class Recipe:
             return cursor.fetchall()
 
 
-def create_db():
-    with dbapi2.connect(app.config['dsn']) as connection:
-        cursor = connection.cursor()
+class CookBookUser():
+    @staticmethod
+    def create_table():
+        with dbapi2.connect(app.config['dsn']) as connection:
+            cursor = connection.cursor()
 
-        query = """DROP TABLE IF EXISTS cookbook_user"""
-        cursor.execute(query)
+            query = """DROP TABLE IF EXISTS cookbook_user"""
+            cursor.execute(query)
 
-        query = """CREATE TABLE cookbook_user (
-                      id SERIAL,
-                      first_name VARCHAR(50) NOT NULL,
-                      last_name VARCHAR(50) NOT NULL,
-                      email VARCHAR(80) UNIQUE NOT NULL,
-                      password CHAR(40) NOT NULL,
-                      PRIMARY KEY (id)
-                      );"""
-        cursor.execute(query)
+            query = """CREATE TABLE cookbook_user (
+                          id SERIAL,
+                          username VARCHAR(50) UNIQUE NOT NULL,
+                          first_name VARCHAR(50) NOT NULL,
+                          last_name VARCHAR(50) NOT NULL,
+                          email VARCHAR(80) UNIQUE NOT NULL,
+                          password CHAR(40) NOT NULL,
+                          PRIMARY KEY (id)
+                          );"""
+            cursor.execute(query)
+            connection.commit()
+    @staticmethod
+    def get(username):
+        with dbapi2.connect(app.config['dsn']) as connection:
+            cursor = connection.cursor()
 
-        query = """DROP TABLE IF EXISTS cookbook_page"""
-        cursor.execute(query)
+            query = """SELECT * FROM cookbook_user WHERE (username = %s)"""
+            cursor.execute(query, [username])
+            return cursor.fetchall()
 
-        query = """CREATE TABLE cookbook_page (
-                      id SERIAL,
-                      name VARCHAR(50) NOT NULL,
-                      admin_user_id INTEGER REFERENCES cookbook_user,
-                      password CHAR(40) NOT NULL,
-                      PRIMARY KEY (id)
-                      );"""
-        cursor.execute(query)
 
-        connection.commit()
+class CookBookPage():
+    @staticmethod
+    def create_table():
+        with dbapi2.connect(app.config['dsn']) as connection:
+            cursor = connection.cursor()
+            query = """DROP TABLE IF EXISTS cookbook_page"""
+            cursor.execute(query)
+
+            query = """CREATE TABLE cookbook_page (
+                          id SERIAL,
+                          name VARCHAR(50) NOT NULL,
+                          admin_user_id INTEGER REFERENCES cookbook_user,
+                          password CHAR(40) NOT NULL,
+                          PRIMARY KEY (id)
+                          );"""
+            cursor.execute(query)
+            connection.commit()
+
+    @staticmethod
+    def get(name):
+        with dbapi2.connect(app.config['dsn']) as connection:
+            cursor = connection.cursor()
+
+            query = """SELECT * FROM cookbook_page WHERE (name = %s)"""
+            cursor.execute(query, [name])
+            return cursor.fetchall()
