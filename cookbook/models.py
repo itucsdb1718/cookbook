@@ -4,11 +4,17 @@ from cookbook import app
 
 
 dsn = """user='{}' password='{}' host='{}' port={}
-         dbname='{}'""".format('hasgul', 'hasgul', 'localhost', '5432', 'cookbook_db')
+         dbname='{}'""".format('postgres', 'suheyl123', 'localhost', '5432', 'cookbook_db')
 
 app.config['dsn'] = dsn
 
+
 class Ingredient:
+    def __init__(self, id=None, name=None, amount=None):
+        self.id = id
+        self.name = name
+        self.amount = amount
+
     @staticmethod
     def create_table():
         with dbapi2.connect(app.config['dsn']) as connection:
@@ -30,7 +36,7 @@ class Ingredient:
                                   id SERIAL,
                                   name VARCHAR(50),
                                   amount VARCHAR(10),
-                                  list_id INTEGER REFERENCES ingredient_list (id),
+                                  list_id INTEGER REFERENCES ingredient_list (id) ON DELETE CASCADE,
                                   PRIMARY KEY (id)
                                );"""
             cursor.execute(query)
@@ -57,6 +63,18 @@ class Ingredient:
 
 
 class Recipe:
+    def __init__(self, id=None, name=None, desc=None, created_at=None, ingredients=None):
+        self.id = id
+        self.name = name
+        self.description = desc
+        self.created_at = created_at
+        self.ingredients = ingredients
+
+    def add_ingredient(self, name, amount, id=None):
+        if not self.ingredients:
+            self.ingredients = []
+        self.ingredients.append(Ingredient(name=name, amount=amount, id=id))
+
     @staticmethod
     def create_table():
         with dbapi2.connect(app.config['dsn']) as connection:
@@ -69,7 +87,8 @@ class Recipe:
                           id SERIAL,
                           name VARCHAR(100),
                           description VARCHAR(1000),
-                          ingredient_id INTEGER REFERENCES ingredient,
+                          created_at DATE,
+                          ingredient_list_id INTEGER REFERENCES ingredient_list ON DELETE CASCADE,
                           PRIMARY KEY (id)
                        );"""
             cursor.execute(query)
@@ -82,10 +101,48 @@ class Recipe:
 
             query = """SELECT * FROM recipe WHERE (name = %s)"""
             cursor.execute(query, [name])
-            return cursor.fetchall()
+
+            recipes = []
+            for id, name, desc, _, created_at in cursor.fetchall():
+                recipes.append([Recipe(id, name, desc, created_at)])
+
+            return recipes
 
 
-class CookBookUser():
+    @staticmethod
+    def get_all():
+        with dbapi2.connect(app.config['dsn']) as connection:
+            cursor = connection.cursor()
+
+            query = """SELECT recipe.id, recipe.name, recipe.description, recipe.created_at,
+                              ingredient.id, ingredient.name, ingredient.amount
+                        FROM recipe
+                        JOIN ingredient_list ON recipe.ingredient_list_id = ingredient_list.id
+                        JOIN ingredient ON ingredient_list.id = ingredient.list_id
+                        ORDER BY recipe.name"""
+            cursor.execute(query)
+
+            row = cursor.fetchone()
+            if not row:
+                return []
+
+            id, name, desc, created_at, ing_id, ing_name, ing_amount = row
+
+            recipes = [Recipe(id, name, desc, created_at)]
+            recipes[0].add_ingredient(ing_name, ing_amount, id)
+
+            for row in cursor.fetchall():
+                id, name, desc, created_at, ing_id, ing_name, ing_amount = row
+
+                if name != recipes[-1].name:
+                    recipes.append(Recipe(id, name, desc, created_at))
+
+                recipes[-1].add_ingredient(ing_name, ing_amount, ing_id)
+
+            return recipes
+
+
+class CookBookUser:
     @staticmethod
     def create_table():
         with dbapi2.connect(app.config['dsn']) as connection:
@@ -105,6 +162,7 @@ class CookBookUser():
                           );"""
             cursor.execute(query)
             connection.commit()
+
     @staticmethod
     def get(username):
         with dbapi2.connect(app.config['dsn']) as connection:
@@ -115,7 +173,7 @@ class CookBookUser():
             return cursor.fetchall()
 
 
-class CookBookPage():
+class CookBookPage:
     @staticmethod
     def create_table():
         with dbapi2.connect(app.config['dsn']) as connection:
@@ -126,7 +184,7 @@ class CookBookPage():
             query = """CREATE TABLE cookbook_page (
                           id SERIAL,
                           name VARCHAR(50) NOT NULL,
-                          admin_user_id INTEGER REFERENCES cookbook_user,
+                          admin_user_id INTEGER REFERENCES cookbook_user ON DELETE CASCADE,
                           password CHAR(40) NOT NULL,
                           PRIMARY KEY (id)
                           );"""

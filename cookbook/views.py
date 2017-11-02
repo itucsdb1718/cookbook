@@ -27,7 +27,8 @@ def profile_page():
 
 @app.endpoint('recipes_page')
 def recipes_page():
-    return render_template('recipes.html')
+    recipes = Recipe.get_all()
+    return render_template('recipes.html', recipes=recipes)
 
 
 @app.endpoint('contact_page')
