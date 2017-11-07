@@ -4,7 +4,8 @@ from flask import render_template, redirect
 from flask.helpers import url_for
 
 from cookbook import app
-from .models import Ingredient, Recipe, CookBookUser, CookBookPage
+from .models import Ingredient, Recipe, CookBookUser, CookBookPage, Message
+
 
 @app.endpoint('initdb')
 def initdb():
@@ -12,7 +13,9 @@ def initdb():
     Recipe.create_table()
     CookBookUser.create_table()
     CookBookPage.create_table()
+    Message.create_table()
     return redirect(url_for('home_page'))
+
 
 @app.endpoint('home_page')
 def home_page():
