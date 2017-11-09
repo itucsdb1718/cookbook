@@ -41,6 +41,38 @@ class Model(object):
         cursor.execute(statement)
         connection.commit()
 
+    @classmethod
+    def get(cls, connection, **kwargs):
+        fields = [name for name in cls.__dict__ if hasattr(cls.__dict__[name], '__sql__')]
+        fields.append('id')
+
+        query = "SELECT {keys} FROM {table} WHERE ({condition}) LIMIT 1"
+        keys = []
+        values = []
+
+        for key in kwargs:
+            if key == 'id' or hasattr(cls, key):
+                keys.append(key)
+                values.append(kwargs[key])
+            else:
+                raise NameError('{} is not a member of {}'.format(key, cls.__name__))
+
+        query = query.format(keys=', '.join(fields),
+                             table=cls.__name__,
+                             condition=' AND '.join(map(lambda x: x + '=%s', keys)))
+
+        cursor = connection.cursor()
+        cursor.execute(query, values)
+        row = cursor.fetchone()
+
+        if not row:
+            return None
+
+        instance = cls()
+        for i, name in enumerate(fields):
+            instance.__setattr__(name, row[i])
+        return instance
+
     def save(self, connection):
         fields = self.__class__.__dict__
 
@@ -88,7 +120,7 @@ class Model(object):
         if name == 'id':
             return self.id
 
-        return self.values[name]
+        return self.values.get(name, None)
 
 
 class ForeignKey:
@@ -183,7 +215,7 @@ if __name__ == '__main__':
     import psycopg2 as dbapi2
 
     dsn = "user='{}' password='{}' host='{}' port={} dbname='{}'"\
-        .format('keo', 'keo123', 'localhost', '5432', 'cookbook_db')
+        .format('postgres', 'psql123', 'localhost', '5432', 'postgres')
 
 
     class CookUser(Model):
@@ -221,3 +253,6 @@ if __name__ == '__main__':
 
         test1.save(conn)
         test2.save(conn)
+
+        user = CookUser.get(conn, name='Emre')
+        print(user.value('name'), user.value('point'))
