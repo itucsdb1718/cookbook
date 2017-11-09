@@ -28,6 +28,7 @@ class Model(object):
         columns.append('PRIMARY KEY (id)')
         statement = statement.format(cls.__name__, ', '.join(columns))
 
+        print(statement)
         cursor = connection.cursor()
         cursor.execute(statement)
         connection.commit()
@@ -48,8 +49,11 @@ class Model(object):
 
         for name in fields:
             if name != 'id' and hasattr(fields[name], '__sql__'):
-                keys.append(name)
-                values.append(self.values[name])
+                value = self.values.get(name, fields[name].default if hasattr(fields[name], 'default') else 0)
+
+                if value is not None:
+                    keys.append(name)
+                    values.append(value)
 
         if self.id:
             statement = "UPDATE {table} SET {keys} WHERE id={pk} RETURNING id"
@@ -63,6 +67,7 @@ class Model(object):
                                          keys=', '.join(keys),
                                          values=', '.join(["%s"]*len(values)))
 
+        print(statement, values)
         cursor = connection.cursor()
         cursor.execute(statement, values)
         connection.commit()
@@ -115,9 +120,10 @@ class ForeignKey:
 
 
 class CharField(object):
-    def __init__(self, max_length, null=True):
+    def __init__(self, max_length, null=True, default=None):
         self.max_length = max_length
         self.null = null
+        self.default = default
 
     def __sql__(self):
         statement = 'VARCHAR({})'.format(self.max_length)
@@ -129,8 +135,49 @@ class CharField(object):
 
 
 class IntegerField(object):
-    pass
+    def __init__(self, size=None, null=True, default=None):
+        self.size = size
+        self.null = null
+        self.default = default
 
+    def __sql__(self):
+        statement = 'INTEGER' + ('({})'.format(self.size) if self.size is not None else '')
+
+        if not self.null:
+            statement += ' NOT NULL'
+
+        return statement
+
+
+class FloatField(object):
+    def __init__(self, size=None, d=None, null=True, default=None):
+        self.size = size
+        self.null = null
+        self.default = default
+
+    def __sql__(self):
+        statement = 'FLOAT' + ('({})'.format(self.size) if self.size is not None else '')
+
+        if not self.null:
+            statement += ' NOT NULL'
+
+        return statement
+
+
+class DateTimeField(object):
+    def __init__(self, auto_now=False, null=True, default=None):
+        self.auto_now = auto_now
+        self.null = null
+
+        self.default = default
+
+    def __sql__(self):
+        statement = 'TIMESTAMP' + (' DEFAULT NOW()' if self.auto_now else '')
+
+        if not self.null:
+            statement += ' NOT NULL'
+
+        return statement
 
 if __name__ == '__main__':
     import psycopg2 as dbapi2
@@ -141,6 +188,9 @@ if __name__ == '__main__':
 
     class CookUser(Model):
         name = CharField(max_length=20)
+        register_date = DateTimeField(auto_now=True)
+        ranking = IntegerField(default=10)
+        point = FloatField(default=3.5)
 
 
     class CookTest(Model):
@@ -160,14 +210,11 @@ if __name__ == '__main__':
         CookUser.create(conn)
         CookTest.create(conn)
 
-        emre = CookUser(name="Emre")
-        user = CookUser(name="User")
+        emre = CookUser(name="Emre", point=8)
+        user = CookUser(name="User", ranking=5)
 
         emre.save(conn)
         user.save(conn)
-
-        print(emre.id)
-        print(user.id)
 
         test1 = CookTest(a="This is char field", b=emre)
         test2 = CookTest(a="Hello world!", b=user)
