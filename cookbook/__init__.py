@@ -1,5 +1,9 @@
-from flask import Flask
+from flask import Blueprint
 
-app = Flask('cookbook')
+cookbook = Blueprint('cookbook', __name__, template_folder='templates',
+                     static_folder='static')
+
+dsn = "user='{}' password='{}' host='{}' port={} dbname='{}'" \
+            .format('keo', 'keo123', 'localhost', '5432', 'cookbook_db')
 
 from . import urls, views, models  # NOQA

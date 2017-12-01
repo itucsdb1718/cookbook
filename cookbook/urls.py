@@ -1,6 +1,7 @@
 from werkzeug.routing import Rule
 
-from cookbook import app
+from cookbook import cookbook
+from . import views
 
 url_map = [
     Rule('/initdb', endpoint='initdb'),
@@ -10,5 +11,8 @@ url_map = [
     Rule('/contact/', endpoint='contact_page'),
 ]
 
-for rule in url_map:
-    app.url_map.add(rule)
+cookbook.add_url_rule('/', view_func=views.home_page)
+cookbook.add_url_rule('/profile/', view_func=views.profile_page)
+cookbook.add_url_rule('/recipes/', view_func=views.recipes_page)
+cookbook.add_url_rule('/contact/', view_func=views.contact_page)
+cookbook.add_url_rule('/initdb/', view_func=views.initdb)
