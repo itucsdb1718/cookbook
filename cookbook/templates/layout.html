@@ -11,14 +11,14 @@
     <title>CookBook</title>
 
     <!-- Bootstrap core CSS -->
-    <link href = "{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+    <link href = "{{ url_for('cookbook.static', filename='bootstrap.min.css') }}" rel="stylesheet">
 
     <!-- Custom fonts for this template -->
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Josefin+Slab:100,300,400,600,700,100italic,300italic,400italic,600italic,700italic" rel="stylesheet" type="text/css">
 
     <!-- Custom styles for this template -->
-    <link href = "{{ url_for('static', filename='business-casual.css') }}" rel="stylesheet">
+    <link href = "{{ url_for('cookbook.static', filename='business-casual.css') }}" rel="stylesheet">
       <style>
           body {
               background: url("/static/images/background-.jpg");
@@ -40,18 +40,18 @@
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav mx-auto">
             <li class="nav-item active px-lg-4">
-              <a class="nav-link text-uppercase text-expanded" href="{{url_for('home_page')}}">Home
+              <a class="nav-link text-uppercase text-expanded" href="{{url_for('cookbook.home_page')}}">Home
                 <span class="sr-only">(current)</span>
               </a>
             </li>
             <li class="nav-item px-lg-4">
-              <a class="nav-link text-uppercase text-expanded" href="{{url_for('profile_page')}}">Profile</a>
+              <a class="nav-link text-uppercase text-expanded" href="{{url_for('cookbook.profile_page')}}">Profile</a>
             </li>
             <li class="nav-item px-lg-4">
-              <a class="nav-link text-uppercase text-expanded" href="{{url_for('recipes_page')}}">Recipes</a>
+              <a class="nav-link text-uppercase text-expanded" href="{{url_for('cookbook.recipes_page')}}">Recipes</a>
             </li>
             <li class="nav-item px-lg-4">
-              <a class="nav-link text-uppercase text-expanded" href="{{url_for('contact_page')}}">Contact</a>
+              <a class="nav-link text-uppercase text-expanded" href="{{url_for('cookbook.contact_page')}}">Contact</a>
             </li>
           </ul>
         </div>
@@ -70,9 +70,9 @@
     </footer>
 
     <!-- Bootstrap core JavaScript -->
-    <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='popper.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('cookbook.static', filename='jquery.min.js') }}"></script>
+    <script src="{{ url_for('cookbook.static', filename='popper.min.js') }}"></script>
+    <script src="{{ url_for('cookbook.static', filename='bootstrap.min.js') }}"></script>
 
   </body>
 

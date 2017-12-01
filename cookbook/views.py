@@ -3,37 +3,51 @@ import datetime
 from flask import render_template, redirect
 from flask.helpers import url_for
 
-from cookbook import app
-from .models import Ingredient, Recipe, CookBookUser, CookBookPage, Message
+from .models import Ingredient, Recipe, Users, CookBookPage, Messages
 
 
-@app.endpoint('initdb')
 def initdb():
     Ingredient.create_table()
     Recipe.create_table()
-    CookBookUser.create_table()
     CookBookPage.create_table()
-    Message.create_table()
-    return redirect(url_for('home_page'))
+    return redirect(url_for('cookbook.home_page'))
 
 
-@app.endpoint('home_page')
 def home_page():
     now = datetime.datetime.now()
     return render_template('home.html', current_time=now.ctime())
 
 
-@app.endpoint('profile_page')
 def profile_page():
+    Users.drop()
+    Messages.drop()
+
+    Users.create()
+    Messages.create()
+
+    emre = Users(username='KEO', firstname='Kadir Emre', lastname='Oto',
+                 email='otok@itu.edu.tr', password='1y2g434328grhwe')
+    suheyl = Users(username='sühül', lastname='Karabela',
+                   email='karabela@itu.edu.tr', password='1y47823h432434')
+
+    emre.save()
+    suheyl.save()
+
+    message = Messages(_from=emre, _to=suheyl, content='Test Message 123')
+    message.save()
+
+    test = Users.get(limit=1, lastname='Karabela')[0]
+    print(test.value('email'))
+
+    mess = Messages.get(limit=1, _to=suheyl)[0]
+    print(mess.value('content'))
     return render_template('profile.html')
 
 
-@app.endpoint('recipes_page')
 def recipes_page():
     recipes = Recipe.get_all()
     return render_template('recipes.html', recipes=recipes)
 
 
-@app.endpoint('contact_page')
 def contact_page():
     return render_template('contact.html')

@@ -1,7 +1,15 @@
 import os
+from flask import Flask
+from cookbook import cookbook
 
-from cookbook import app
 
+dsn = """user='{}' password='{}' host='{}' port={}
+         dbname='{}'""".format('postgres', 'suheyl123', 'localhost', '5432', 'cookbook_db')
+
+app = Flask(__name__, static_folder=None)
+app.register_blueprint(cookbook)
+
+app.config['dsn'] = dsn
 
 if __name__ == '__main__':
     VCAP_APP_PORT = os.getenv('VCAP_APP_PORT')

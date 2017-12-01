@@ -1,12 +1,7 @@
 import psycopg2 as dbapi2
 
-from cookbook import app
-
-
-dsn = """user='{}' password='{}' host='{}' port={}
-         dbname='{}'""".format('postgres', 'suheyl123', 'localhost', '5432', 'cookbook_db')
-
-app.config['dsn'] = dsn
+from cookbook import cookbook
+from .abstract import *
 
 
 class Ingredient:
@@ -17,7 +12,7 @@ class Ingredient:
 
     @staticmethod
     def create_table():
-        with dbapi2.connect(app.config['dsn']) as connection:
+        with dbapi2.connect(cookbook.config['dsn']) as connection:
             cursor = connection.cursor()
 
             query = """DROP TABLE IF EXISTS ingredient_list CASCADE"""
@@ -54,7 +49,7 @@ class Ingredient:
 
     @staticmethod
     def get(name):
-        with dbapi2.connect(app.config['dsn']) as connection:
+        with dbapi2.connect(cookbook.config['dsn']) as connection:
             cursor = connection.cursor()
 
             query = """SELECT * FROM ingredient WHERE (name = %s)"""
@@ -77,7 +72,7 @@ class Recipe:
 
     @staticmethod
     def create_table():
-        with dbapi2.connect(app.config['dsn']) as connection:
+        with dbapi2.connect(cookbook.config['dsn']) as connection:
             cursor = connection.cursor()
 
             query = """DROP TABLE IF EXISTS recipe"""
@@ -96,7 +91,7 @@ class Recipe:
 
     @staticmethod
     def get(name):
-        with dbapi2.connect(app.config['dsn']) as connection:
+        with dbapi2.connect(cookbook.config['dsn']) as connection:
             cursor = connection.cursor()
 
             query = """SELECT * FROM recipe WHERE (name = %s)"""
@@ -111,7 +106,7 @@ class Recipe:
 
     @staticmethod
     def get_all():
-        with dbapi2.connect(app.config['dsn']) as connection:
+        with dbapi2.connect(cookbook.config['dsn']) as connection:
             cursor = connection.cursor()
 
             query = """SELECT recipe.id, recipe.name, recipe.description, recipe.created_at,
@@ -142,41 +137,10 @@ class Recipe:
             return recipes
 
 
-class CookBookUser:
-    @staticmethod
-    def create_table():
-        with dbapi2.connect(app.config['dsn']) as connection:
-            cursor = connection.cursor()
-
-            query = """DROP TABLE IF EXISTS cookbook_user CASCADE"""
-            cursor.execute(query)
-
-            query = """CREATE TABLE cookbook_user (
-                          id SERIAL,
-                          username VARCHAR(50) UNIQUE NOT NULL,
-                          first_name VARCHAR(50) NOT NULL,
-                          last_name VARCHAR(50) NOT NULL,
-                          email VARCHAR(80) UNIQUE NOT NULL,
-                          password CHAR(40) NOT NULL,
-                          PRIMARY KEY (id)
-                          );"""
-            cursor.execute(query)
-            connection.commit()
-
-    @staticmethod
-    def get(username):
-        with dbapi2.connect(app.config['dsn']) as connection:
-            cursor = connection.cursor()
-
-            query = """SELECT * FROM cookbook_user WHERE (username = %s)"""
-            cursor.execute(query, [username])
-            return cursor.fetchall()
-
-
 class CookBookPage:
     @staticmethod
     def create_table():
-        with dbapi2.connect(app.config['dsn']) as connection:
+        with dbapi2.connect(cookbook.config['dsn']) as connection:
             cursor = connection.cursor()
             query = """DROP TABLE IF EXISTS cookbook_page"""
             cursor.execute(query)
@@ -193,7 +157,7 @@ class CookBookPage:
 
     @staticmethod
     def get(name):
-        with dbapi2.connect(app.config['dsn']) as connection:
+        with dbapi2.connect(cookbook.config['dsn']) as connection:
             cursor = connection.cursor()
 
             query = """SELECT * FROM cookbook_page WHERE (name = %s)"""
@@ -201,43 +165,17 @@ class CookBookPage:
             return cursor.fetchall()
 
 
-class Message:
-    @staticmethod
-    def create_table():
-        with dbapi2.connect(app.config['dsn']) as connection:
-            cursor = connection.cursor()
+class Users(Model):
+    username = CharField(max_length=50, null=False)
+    firstname = CharField(max_length=50, null=False, default='-')
+    lastname = CharField(max_length=50, null=False)
+    email = CharField(max_length=80, null=False)
+    password = CharField(max_length=32, null=False)  # hash of password
 
-            query = """DROP TABLE IF EXISTS messages CASCADE"""
-            cursor.execute(query)
 
-            query = """CREATE TABLE messages (
-                        id SERIAL,
-                        _from INTEGER REFERENCES cookbook_user ON DELETE CASCADE,
-                        _to INTEGER REFERENCES cookbook_user ON DELETE CASCADE,
-                        content VARCHAR(50) NOT NULL,
-                        created_at TIMESTAMP DEFAULT NOW(),
-                        PRIMARY KEY (id) );"""
+class Messages(Model):
+    _from = ForeignKey(Users, on_delete='CASCADE')
+    _to = ForeignKey(Users, on_delete='CASCADE')
+    created_at = DateTimeField(auto_now=True)
+    content = CharField(max_length=1000)
 
-            cursor.execute(query)
-            connection.commit()
-
-    @staticmethod
-    def get(_from, _to):
-        with dbapi2.connect(app.config['dsn']) as connection:
-            cursor = connection.cursor()
-
-            query = """SELECT * FROM messages WHERE (_from = %s AND _to = %s) ORDER BY created_at"""
-            cursor.execute(query, (_from, _to))
-
-            return cursor.fetchall()
-
-    @staticmethod
-    def add(_from, _to, content):
-        with dbapi2.connect(app.config['dsn']) as connection:
-            cursor = connection.cursor()
-
-            query = """INSERT INTO messages (_from, _to, content) 
-                          VALUES (%s, %s, %s)"""
-            cursor.execute(query, (_from, _to, content))
-
-            return connection.commit()
