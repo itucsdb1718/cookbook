@@ -4,14 +4,10 @@ from cookbook import dsn
 
 class Model(object):
     id = 0
-    values = None
 
     def __init__(self, **kwargs):
-        if self.values is None:
-            self.values = {}
-
         for name in kwargs:
-            self.__setattr__(name, kwargs[name])
+            setattr(self, name, kwargs[name])
 
     @classmethod
     def create(cls):
@@ -46,14 +42,20 @@ class Model(object):
             connection.commit()
 
     @classmethod
-    def get(cls, limit=1, **kwargs):
+    def get(cls, limit=1, order_by=None, **kwargs):
         fields = [name for name in cls.__dict__ if hasattr(cls.__dict__[name], '__sql__')]
         fields.append('id')
 
-        statement = "SELECT {keys} FROM {table} WHERE ({condition})"
+        statement = "SELECT {keys} FROM {table}"
+
+        if kwargs:
+            statement += " WHERE ({condition})"
+        if order_by:
+            if order_by.startswith('-'):
+                order_by = order_by[1:] + ' DESC'
+            statement += ' ORDER BY ' + order_by
         if limit:
             statement += " LIMIT {}".format(limit)
-
         keys = []
         values = []
 
@@ -62,8 +64,7 @@ class Model(object):
                 keys.append(key)
 
                 if isinstance(kwargs[key], Model):  # if value is Foreign Key
-                    values.append(kwargs[key].value('id'))
-
+                    values.append(kwargs[key].id)
                 else:
                     values.append(kwargs[key])
             else:
@@ -72,7 +73,7 @@ class Model(object):
         statement = statement.format(keys=', '.join(fields),
                                      table=cls.__name__,
                                      condition=' AND '.join(map(lambda x: x + '=%s', keys)))
-
+        print(statement)
         with dbapi2.connect(dsn) as connection:
             cursor = connection.cursor()
             cursor.execute(statement, values)
@@ -80,12 +81,10 @@ class Model(object):
             rows = cursor.fetchall()
 
         output = []
-
         for row in rows:
             instance = cls()
             for i, name in enumerate(fields):
-                instance.__setattr__(name, row[i])
-
+                setattr(instance, name, row[i])
             output.append(instance)
         return output
 
@@ -97,7 +96,7 @@ class Model(object):
 
         for name in fields:
             if name != 'id' and hasattr(fields[name], '__sql__'):
-                value = self.values.get(name, fields[name].default if hasattr(fields[name], 'default') else None)
+                value = getattr(self, name)
 
                 if value is not None:
                     keys.append(name)
@@ -108,7 +107,10 @@ class Model(object):
             statement = statement.format(table=self.__class__.__name__,
                                          keys=', '.join(map(lambda x: x + "=%s", keys)),
                                          pk=self.id)
-
+        elif len(values) == 0:
+            statement = "INSERT INTO {table} (id) VALUES (default) RETURNING id"
+            statement = statement.format(table=self.__class__.__name__,
+                                         keys=', '.join(keys))
         else:
             statement = "INSERT INTO {table} ({keys}) VALUES ({values}) RETURNING id"
             statement = statement.format(table=self.__class__.__name__,
@@ -123,24 +125,21 @@ class Model(object):
 
         self.id = self.id if self.id else cursor.fetchone()[0]
 
-    def __setattr__(self, key, value):
-        if hasattr(self.__class__.__dict__.get(key), '__sql__'):
-            self.values[key] = value
 
-            if isinstance(value, Model):  # if value is ForeignKey
-                self.values[key] = value.id
+class BaseField:
+    def __get__(self, instance, owner):
+        if not instance:
+            return self
+        return instance.__dict__.get(self.__name, getattr(self, 'default', None))
 
-        else:
-            self.__dict__[key] = value
+    def __set__(self, instance, value):
+        instance.__dict__[self.__name] = value
 
-    def value(self, name):
-        if name == 'id':
-            return self.id
-
-        return self.values.get(name, None)
+    def __set_name__(self, owner, name):
+        self.__name = name
 
 
-class ForeignKey:
+class ForeignKey(BaseField):
     def __init__(self, to, to_field=None, on_delete=None, on_update=None):
         self.to = to
         self.to_field = to_field
@@ -168,7 +167,7 @@ class ForeignKey:
         self.__dict__[key] = value
 
 
-class CharField(object):
+class CharField(BaseField):
     def __init__(self, max_length, null=True, default=None):
         self.max_length = max_length
         self.null = null
@@ -183,7 +182,7 @@ class CharField(object):
         return statement
 
 
-class IntegerField(object):
+class IntegerField(BaseField):
     def __init__(self, size=None, null=True, default=None):
         self.size = size
         self.null = null
@@ -198,7 +197,7 @@ class IntegerField(object):
         return statement
 
 
-class FloatField(object):
+class FloatField(BaseField):
     def __init__(self, size=None, null=True, default=None):
         self.size = size
         self.null = null
@@ -213,7 +212,7 @@ class FloatField(object):
         return statement
 
 
-class DateTimeField(object):
+class DateTimeField(BaseField):
     def __init__(self, auto_now=False, null=True, default=None):
         self.auto_now = auto_now
         self.null = null
@@ -227,6 +226,7 @@ class DateTimeField(object):
             statement += ' NOT NULL'
 
         return statement
+
 
 if __name__ == '__main__':
     class Users(Model):

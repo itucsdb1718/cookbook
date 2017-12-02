@@ -4,16 +4,15 @@
     {% for recipe  in recipes %}
         <div class="bg-faded p-4 my-4">
         <div class="card card-inverse">
-          <img class="card-img img-fluid w-100" src="{{ url_for('static', filename='images/slide-1.jpg') }}" alt="">
-          <div class="card-img-overlay bg-overlay">
-            <h2 class="card-title text-shadow text-white text-uppercase mb-0">{{ recipe.name }}</h2>
-            <h4 class="text-shadow text-white">{{ recipe.created_at }}</h4>
-            <p>
-            {% for ingredient in recipe.ingredients %}
-                <span class="lead card-text text-shadow text-white w-50 d-none d-lg-block">{{ ingredient.name }}: {{ ingredient.amount }}</span>
-            {% endfor %}
-            </p>
-            <p class="lead card-text text-shadow text-white w-50 d-none d-lg-block">{{ recipe.description }}</p>
+          <div class="card-img-overlay bg-overlay" style="position: relative">
+            <h2 class="card-title text-shadow text-white  text-uppercase mb-0">{{ recipe.name }}</h2>
+            <h6 class="text-shadow text-white">{{ recipe.created_at }}</h6>
+            <span class="lead card-text text-white">Ingredients:</span>
+              {% for ingredient in recipe.ingredients %}
+                  <span class="card-text text-white d-lg-block">{{ ingredient.name }}: {{ ingredient.amount }}</span>
+              {% endfor %}
+              <br>
+            <p class="lead card-text text-shadow text-white d-lg-block">{{ recipe.description }}</p>
             <a href="#" class="btn btn-secondary">Read More</a>
           </div>
         </div>
@@ -22,7 +21,7 @@
     
       <div class="bg-faded p-4 my-4">
         <div class="card card-inverse">
-          <img class="card-img img-fluid w-100" src="{{ url_for('static', filename='images/slide-1.jpg') }}" alt="">
+          <img class="card-img img-fluid w-100" src="{{ url_for('cookbook.static', filename='images/slide-1.jpg') }}" alt="">
           <div class="card-img-overlay bg-overlay">
             <h2 class="card-title text-shadow text-white text-uppercase mb-0">Post Title</h2>
             <h4 class="text-shadow text-white">March 1, 2017</h4>
@@ -34,7 +33,7 @@
 
       <div class="bg-faded p-4 my-4">
         <div class="card card-inverse">
-          <img class="card-img img-fluid w-100" src="{{ url_for('static', filename='images/slide-2.jpg') }}" alt="">
+          <img class="card-img img-fluid w-100" src="{{ url_for('cookbook.static', filename='images/slide-2.jpg') }}" alt="">
           <div class="card-img-overlay bg-overlay">
             <h2 class="card-title text-shadow text-white text-uppercase mb-0">Post Title</h2>
             <h4 class="text-shadow text-white">March 1, 2017</h4>
@@ -46,7 +45,7 @@
 
       <div class="bg-faded p-4 my-4">
         <div class="card card-inverse">
-          <img class="card-img img-fluid w-100" src="{{ url_for('static', filename='images/slide-3.jpg') }}" alt="">
+          <img class="card-img img-fluid w-100" src="{{ url_for('cookbook.static', filename='images/slide-3.jpg') }}" alt="">
           <div class="card-img-overlay bg-overlay">
             <h2 class="card-title text-shadow text-white text-uppercase mb-0">Post Title</h2>
             <h4 class="text-shadow text-white">March 1, 2017</h4>
