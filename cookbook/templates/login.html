@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <link href = "{{ url_for('cookbook.static', filename='login.css') }}" rel="stylesheet">
+    <div class="bg-faded p-4 my-4">
+
+        <p> Username: {{ current_user.username }} </p>
+
+        <form method="POST" action="">
+            <input name="username" type="text" placeholder="username">
+            <input name="password" type="text" placeholder="password">
+            <input type="submit" value="Submit">
+        </form>
+
+
+        <a href="#" data-toggle="modal" data-target="#login-modal">Login</a>
+
+        <div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="loginModelLabel" aria-hidden="true" style="display: none;">
+            <div class="modal-dialog">
+                <div class="loginmodal-container">
+                    <h1>Login to Your Cookbook Account</h1>
+                    <br>
+
+                    <form>
+                        <input type="text" name="username" placeholder="Username">
+                        <input type="password" name="password" placeholder="Password">
+                        <input type="submit" name="login" class="login loginmodal-submit" value="Login">
+                    </form>
+
+                    <div class="login-help">
+                        <a href="#">Register</a> - <a href="#">Forgot Password</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}

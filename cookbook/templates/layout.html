@@ -19,6 +19,7 @@
 
     <!-- Custom styles for this template -->
     <link href = "{{ url_for('cookbook.static', filename='business-casual.css') }}" rel="stylesheet">
+    <link href = "{{ url_for('cookbook.static', filename='login.css') }}" rel="stylesheet">
       <style>
           body {
               background: url("/static/images/background-.jpg");
@@ -44,15 +45,29 @@
                 <span class="sr-only">(current)</span>
               </a>
             </li>
-            <li class="nav-item px-lg-4">
-              <a class="nav-link text-uppercase text-expanded" href="{{url_for('cookbook.profile_page')}}">Profile</a>
-            </li>
+
             <li class="nav-item px-lg-4">
               <a class="nav-link text-uppercase text-expanded" href="{{url_for('cookbook.recipes_page')}}">Recipes</a>
             </li>
+
             <li class="nav-item px-lg-4">
               <a class="nav-link text-uppercase text-expanded" href="{{url_for('cookbook.contact_page')}}">Contact</a>
             </li>
+
+            <li class="nav-item px-lg-4">
+              {% if not current_user.is_authenticated %}
+                <a class="nav-link text-uppercase text-expanded" href="#" data-toggle="modal" data-target="#login-modal">Login</a>
+              {% else %}
+                <a class="nav-link text-uppercase text-expanded" href="{{url_for('cookbook.profile_page')}}">{{ current_user.username }}</a>
+              {% endif %}
+            </li>
+
+            {% if current_user.is_authenticated %}
+              <li class="nav-item px-lg-4">
+                <a class="nav-link text-uppercase text-expanded" href="{{url_for('cookbook.logout')}}">Logout</a>
+              </li>
+            {% endif %}
+
           </ul>
         </div>
       </div>
@@ -63,6 +78,25 @@
     </div>
     <!-- /.container -->
 
+    <div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="loginModelLabel" aria-hidden="true" style="display: none;">
+        <div class="modal-dialog">
+            <div class="loginmodal-container">
+                <h1>Login to Your Cookbook Account</h1>
+                <br>
+
+                <form method="POST" action="{{url_for('cookbook.login')}}">
+                    <input type="text" name="username" placeholder="Username">
+                    <input type="password" name="password" placeholder="Password">
+                    <input type="submit" name="login" class="login loginmodal-submit" value="Login">
+                </form>
+
+                <div class="login-help">
+                    <a href="#">Register</a> - <a href="#">Forgot Password</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer class="bg-faded text-center py-5">
       <div class="container">
         <p class="m-0">Copyright &copy; CookBook 2017</p>
@@ -72,7 +106,7 @@
     <!-- Bootstrap core JavaScript -->
     <script src="{{ url_for('cookbook.static', filename='jquery.min.js') }}"></script>
     <script src="{{ url_for('cookbook.static', filename='popper.min.js') }}"></script>
-    <script src="{{ url_for('cookbook.static', filename='bootstrap.min.js') }}"></script>
+        <script src="{{ url_for('cookbook.static', filename='bootstrap.min.js') }}"></script>
 
   </body>
 
