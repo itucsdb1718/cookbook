@@ -1,7 +1,9 @@
 applications:
+- services:
+  - ElephantSQL-q6
 - disk_quota: 1024M
-  host: cookbook
-  name: cookbook
+  host: itucsdb1718
+  name: itucsdb1718
   path: .
   domain: mybluemix.net
   instances: 1

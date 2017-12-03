@@ -1,5 +1,5 @@
 import psycopg2 as dbapi2
-from cookbook import dsn
+from flask import current_app
 
 
 class Model(object):
@@ -27,7 +27,7 @@ class Model(object):
         statement = statement.format(cls.__name__, ', '.join(columns))
 
         print(statement)
-        with dbapi2.connect(dsn) as connection:
+        with dbapi2.connect(current_app.config['dsn']) as connection:
             cursor = connection.cursor()
             cursor.execute(statement)
             connection.commit()
@@ -36,7 +36,7 @@ class Model(object):
     def drop(cls):
         statement = "DROP TABLE IF EXISTS " + cls.__name__ + " CASCADE"
 
-        with dbapi2.connect(dsn) as connection:
+        with dbapi2.connect(current_app.config['dsn']) as connection:
             cursor = connection.cursor()
             cursor.execute(statement)
             connection.commit()
@@ -74,7 +74,7 @@ class Model(object):
                                      table=cls.__name__,
                                      condition=' AND '.join(map(lambda x: x + '=%s', keys)))
         print(statement)
-        with dbapi2.connect(dsn) as connection:
+        with dbapi2.connect(current_app.config['dsn']) as connection:
             cursor = connection.cursor()
             cursor.execute(statement, values)
 
@@ -118,7 +118,7 @@ class Model(object):
                                          values=', '.join(["%s"]*len(values)))
 
         print(statement, values)
-        with dbapi2.connect(dsn) as connection:
+        with dbapi2.connect(current_app.config['dsn']) as connection:
             cursor = connection.cursor()
             cursor.execute(statement, values)
             connection.commit()
