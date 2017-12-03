@@ -21,12 +21,11 @@ def initdb():
                  email='otok@itu.edu.tr', password='1y2g434328grhwe')
     suheyl = Users(username='sühül', lastname='Karabela',
                    email='karabela@itu.edu.tr', password='1y47823h432434')
+    emre.save()
+    suheyl.save()
 
     message = Message(_from=emre, _to=suheyl, content='Test Message 123')
     message.save()
-
-    emre.save()
-    suheyl.save()
     return redirect(url_for('cookbook.home_page'))
 
 

@@ -3,13 +3,13 @@
 
     <div class="bg-faded p-4 my-4">
         <hr class="divider">
-        <h2 class="text-center text-lg text-uppercase my-0">{{ suheyl.value('username') }}
+        <h2 class="text-center text-lg text-uppercase my-0">{{ suheyl.username }}
           <strong>profile</strong>
         </h2>
         <hr class="divider">
         <h3>My ingredients</h3>
         {% for message in messages %}
-            <p>{{ message.value('content') }}</p>
+            <p>{{ message.content }}</p>
         {% endfor %}
         
         <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam soluta dolore voluptatem, deleniti dignissimos excepturi veritatis cum hic sunt perferendis ipsum perspiciatis nam officiis sequi atque enim ut! Velit, consectetur.</p>
