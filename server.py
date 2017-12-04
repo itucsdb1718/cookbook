@@ -1,7 +1,9 @@
-import os
 from flask import Flask
 from cookbook import cookbook, models
 from flask_login import LoginManager
+import json
+import re
+import os
 
 
 dsn = """user='{}' password='{}' host='{}' port={}
@@ -10,11 +12,21 @@ dsn = """user='{}' password='{}' host='{}' port={}
 app = Flask(__name__, static_folder=None)
 app.register_blueprint(cookbook)
 
-app.config['dsn'] = dsn
 app.secret_key = 'sdgfsdyfbhsdfysd'
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+def get_elephantsql_dsn(vcap_services):
+    """Returns the data source name for ElephantSQL."""
+    parsed = json.loads(vcap_services)
+    uri = parsed["elephantsql"][0]["credentials"]["uri"]
+    match = re.match('postgres://(.*?):(.*?)@(.*?)(:(\d+))?/(.*)', uri)
+    user, password, host, _, port, dbname = match.groups()
+    dsn = """user='{}' password='{}' host='{}' port={}
+             dbname='{}'""".format(user, password, host, port, dbname)
+    return dsn
 
 
 @login_manager.user_loader
@@ -31,4 +43,11 @@ if __name__ == '__main__':
         port, debug = int(VCAP_APP_PORT), False
     else:
         port, debug = 5000, True
+
+    VCAP_SERVICES = os.getenv('VCAP_SERVICES')
+    if VCAP_SERVICES is not None:
+        app.config['dsn'] = get_elephantsql_dsn(VCAP_SERVICES)
+    else:
+        app.config['dsn'] = dsn
+
     app.run(host='0.0.0.0', port=port, debug=debug)
