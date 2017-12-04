@@ -130,15 +130,15 @@ class BaseField:
     def __get__(self, instance, owner):
         if not instance:
             return self
-        return instance.__dict__.get(self.__name, getattr(self, 'default', None))
+        return instance.__dict__.get(self._name, getattr(self, 'default', None))
 
     def __set__(self, instance, value):
         if isinstance(value, Model):
             value = value.id
-        instance.__dict__[self.__name] = value
+        instance.__dict__[self._name] = value
 
     def __set_name__(self, owner, name):
-        self.__name = name
+        self._name = name
 
 
 class ForeignKey(BaseField):
