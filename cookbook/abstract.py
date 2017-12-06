@@ -42,20 +42,61 @@ class Model(object):
             connection.commit()
 
     @classmethod
-    def get(cls, limit=1, order_by=None, **kwargs):
-        fields = [name for name in cls.__dict__ if hasattr(cls.__dict__[name], '__sql__')]
-        fields.append('id')
+    def get_fields(cls):
+        return ['id'] + [name for name in cls.__dict__ if hasattr(cls.__dict__[name], '__sql__')]
 
-        statement = "SELECT {keys} FROM {table}"
+    @classmethod
+    def get(cls, limit=1, order_by=None, select_related=(), prefetch=None, **kwargs):
+        """
+        :param str order_by:
+        :param int, None limit:
+        :param select_related: for joining with another model based on field(s) of this model
+        :type select_related: list, str
+        :param prefetch: for joining with another model based on other's foreign key
+        :type prefetch: ForeignKey
+        """
+        fields = cls.get_fields()
+
+        related_fields = {}
+        prefetch_fields = []
+
+        statement = "SELECT *"
+        table_statement = cls.__name__
+
+        if select_related:
+            if isinstance(select_related, str):
+                select_related = [select_related]
+            for field in select_related:
+                st = ' INNER JOIN {name} as {field}{name} ON ({table}.{field} = {field}{name}.id)'\
+                        .format(name=cls.__dict__[field].to.__name__,
+                                table=cls.__name__,
+                                field=field)
+
+                related_fields[field] = cls.__dict__[field].to.get_fields()
+                table_statement += st
+
+        if prefetch:
+            st = ' INNER JOIN {name} as {field}{name} ON ({field}{name}.{field} = {table}.id)'\
+                    .format(name=prefetch.owner.__name__,
+                            field=prefetch._name,
+                            table=cls.__name__)
+
+            prefetch_fields.extend(prefetch.owner.get_fields())
+            table_statement += st
+
+        statement += ' FROM ' + table_statement
 
         if kwargs:
             statement += " WHERE ({condition})"
+
         if order_by:
             if order_by.startswith('-'):
                 order_by = order_by[1:] + ' DESC'
             statement += ' ORDER BY ' + order_by
+
         if limit:
             statement += " LIMIT {}".format(limit)
+
         keys = []
         values = []
 
@@ -70,9 +111,8 @@ class Model(object):
             else:
                 raise NameError('{} is not a member of {}'.format(key, cls.__name__))
 
-        statement = statement.format(keys=', '.join(fields),
-                                     table=cls.__name__,
-                                     condition=' AND '.join(map(lambda x: x + '=%s', keys)))
+        statement = statement.format(condition=' AND '.join(map(lambda x: x + '=%s', keys)))
+
         print(statement)
         with dbapi2.connect(current_app.config['dsn']) as connection:
             cursor = connection.cursor()
@@ -81,10 +121,36 @@ class Model(object):
             rows = cursor.fetchall()
 
         output = []
+        out_index = {}
+
         for row in rows:
             instance = cls()
-            for i, name in enumerate(fields):
+            i = 0
+            for name in fields:
                 setattr(instance, name, row[i])
+                i += 1
+
+            for field in select_related:
+                f = cls.__dict__[field].to()
+                for f_field in related_fields[field]:
+                    setattr(f, f_field, row[i])
+                    i += 1
+                setattr(instance, field, f)
+
+            if prefetch:
+                related_instance = prefetch.owner()
+                for name in prefetch_fields:
+                    setattr(related_instance, name, row[i])
+                    i += 1
+
+                if instance.id not in out_index:
+                    setattr(instance, prefetch.owner.__name__.lower() + '__set', [related_instance])
+                else:
+                    getattr(output[out_index[instance.id]], prefetch.owner.__name__.lower() + '__set')\
+                        .append(related_instance)
+                    continue
+
+            out_index[instance.id] = len(output)
             output.append(instance)
         return output
 
@@ -97,6 +163,9 @@ class Model(object):
         for name in fields:
             if name != 'id' and hasattr(fields[name], '__sql__'):
                 value = getattr(self, name)
+
+                if isinstance(value, Model):
+                    value = value.id
 
                 if value is not None:
                     keys.append(name)
@@ -133,11 +202,10 @@ class BaseField:
         return instance.__dict__.get(self._name, getattr(self, 'default', None))
 
     def __set__(self, instance, value):
-        if isinstance(value, Model):
-            value = value.id
         instance.__dict__[self._name] = value
 
     def __set_name__(self, owner, name):
+        self.owner = owner
         self._name = name
 
 

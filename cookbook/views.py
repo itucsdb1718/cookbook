@@ -42,15 +42,13 @@ def home_page():
 
 @login_required
 def profile_page():
-    suheyl = Users.get(limit=1, lastname='Karabela')[0]
-    messages = Message.get(_to=suheyl, limit=None)
+    suheyl = Users.get(limit=None, lastname='Karabela', prefetch=Ingredient._user)[0]
+    messages = Message.get(_to=suheyl, limit=None, select_related=['_from', '_to'])
     return render_template('profile.html', **locals())
 
 
 def recipes_page():
-    recipes = Recipe.get(limit=None, order_by='-description')
-    for recipe in recipes:
-        recipe.ingredients = Ingredient.get(limit=None, recipe=recipe)
+    recipes = Recipe.get(limit=None, order_by='-description', prefetch=Ingredient.recipe)
     return render_template('recipes.html', recipes=recipes)
 
 

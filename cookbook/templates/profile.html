@@ -9,7 +9,11 @@
         <hr class="divider">
         <h3>My ingredients</h3>
         {% for message in messages %}
-            <p>{{ message.content }}</p>
+            <p>from {{ message._from.username }}, to {{ message._to.username }}: {{ message.content }}</p>
+        {% endfor %}
+
+        {% for ingredient in suheyl.ingredient__set %}
+            <p>{{ ingredient.name }}: {{ ingredient.amount }}</p>
         {% endfor %}
         
         <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam soluta dolore voluptatem, deleniti dignissimos excepturi veritatis cum hic sunt perferendis ipsum perspiciatis nam officiis sequi atque enim ut! Velit, consectetur.</p>
