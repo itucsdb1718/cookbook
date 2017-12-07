@@ -6,7 +6,7 @@ from hashlib import md5
 from flask_login import UserMixin
 
 
-class Users(Model, UserMixin):
+class Users(UserMixin, Model):
     username = CharField(max_length=50, null=False)
     firstname = CharField(max_length=50, null=False, default='-')
     lastname = CharField(max_length=50, null=False)
@@ -42,6 +42,7 @@ class Message(Model):
 
 class Recipe(Model):
     name = CharField(max_length=50)
+    _user = ForeignKey(Users, on_delete='CASCADE')
     description = CharField(max_length=1000)
     created_at = DateTimeField(auto_now=True)
 

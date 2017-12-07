@@ -27,7 +27,7 @@ def get_elephantsql_dsn(vcap_services):
 @app.route('/')
 def home_page():
     now = datetime.datetime.now()
-    return render_template('home.html', current_time=now.ctime())
+    return render_template('old/home.html', current_time=now.ctime())
 
 
 @app.route('/initdb')

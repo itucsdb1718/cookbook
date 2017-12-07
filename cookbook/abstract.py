@@ -1,5 +1,6 @@
 import psycopg2 as dbapi2
 from flask import current_app
+from flask_login import current_user
 
 
 class Model(object):
@@ -76,7 +77,7 @@ class Model(object):
                 table_statement += st
 
         if prefetch:
-            st = ' INNER JOIN {name} as {field}{name} ON ({field}{name}.{field} = {table}.id)'\
+            st = ' LEFT OUTER JOIN {name} as {field}{name} ON ({field}{name}.{field} = {table}.id)'\
                     .format(name=prefetch.owner.__name__,
                             field=prefetch._name,
                             table=cls.__name__)
@@ -102,9 +103,9 @@ class Model(object):
 
         for key in kwargs:
             if key == 'id' or hasattr(cls, key):
-                keys.append(key)
+                keys.append(cls.__name__ + '.' + key)
 
-                if isinstance(kwargs[key], Model):  # if value is Foreign Key
+                if isinstance(kwargs[key], Model) or isinstance(kwargs[key], current_user.__class__):  # if value is Foreign Key
                     values.append(kwargs[key].id)
                 else:
                     values.append(kwargs[key])
@@ -113,7 +114,7 @@ class Model(object):
 
         statement = statement.format(condition=' AND '.join(map(lambda x: x + '=%s', keys)))
 
-        print(statement)
+        print(statement, values)
         with dbapi2.connect(current_app.config['dsn']) as connection:
             cursor = connection.cursor()
             cursor.execute(statement, values)
@@ -144,9 +145,9 @@ class Model(object):
                     i += 1
 
                 if instance.id not in out_index:
-                    setattr(instance, prefetch.owner.__name__.lower() + '__set', [related_instance])
+                    setattr(instance, prefetch.owner.__name__.lower() + '_set', [related_instance])
                 else:
-                    getattr(output[out_index[instance.id]], prefetch.owner.__name__.lower() + '__set')\
+                    getattr(output[out_index[instance.id]], prefetch.owner.__name__.lower() + '_set')\
                         .append(related_instance)
                     continue
 
