@@ -37,13 +37,12 @@ def initdb():
 
 def home_page():
     now = datetime.datetime.now()
-    return render_template('home.html', current_time=now.ctime())
+    return render_template('layout.html', current_time=now.ctime())
 
 
 @login_required
 def profile_page():
-    suheyl = Users.get(limit=None, lastname='Karabela', prefetch=Ingredient._user)[0]
-    messages = Message.get(_to=suheyl, limit=None, select_related=['_from', '_to'])
+    recipes = Recipe.get(limit=None, _user=current_user, prefetch=Ingredient.recipe)
     return render_template('profile.html', **locals())
 
 
@@ -53,7 +52,7 @@ def recipes_page():
 
 
 def contact_page():
-    return render_template('contact.html')
+    return render_template('old/contact.html')
 
 
 def login():
