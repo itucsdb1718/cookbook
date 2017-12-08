@@ -1,8 +1,9 @@
+import os
 import datetime
 
-from flask import render_template, redirect, flash
 from flask.helpers import url_for
-from flask import request
+from flask import render_template, redirect, flash
+from flask import request, current_app, send_from_directory
 from flask_login.utils import login_required, login_user, current_user, logout_user
 
 from .models import Ingredient, Recipe, Users, Message
@@ -32,6 +33,34 @@ def initdb():
 
     message = Message(_from=emre, _to=suheyl, content='Test Message 123')
     message.save()
+
+    recipe1 = Recipe(name='Kuru Fasülye', description='Mertcaaaaan', _user=emre)
+    recipe2 = Recipe(name='Cacık', description='Short Description 3', _user=emre)
+    recipe3 = Recipe(name='Pilav', description='Short Description 2', _user=suheyl)
+
+    recipe1.save()
+    recipe2.save()
+    recipe3.save()
+
+    fasulye = Ingredient(recipe=recipe1, amount='100 gr', name='Fasülye')
+    domates = Ingredient(recipe=recipe1, amount='3 adet', name='Domates')
+    biber = Ingredient(recipe=recipe1, amount='5 adet', name='Biber')
+
+    salatalik = Ingredient(recipe=recipe2, amount='3 adet', name='Salatalık')
+    yogurt = Ingredient(recipe=recipe2, amount='300 ml', name='Yoğurt')
+
+    pirinc = Ingredient(recipe=recipe3, amount='1 kase', name='Pirinç')
+    su = Ingredient(recipe=recipe3, amount='1L', name='Su')
+
+    fasulye.save()
+    domates.save()
+    biber.save()
+    salatalik.save()
+    yogurt.save()
+    pirinc.save()
+    su.save()
+
+
     return redirect(url_for('cookbook.home_page'))
 
 
@@ -53,6 +82,57 @@ def recipes_page():
 
 def contact_page():
     return render_template('old/contact.html')
+
+
+def uploaded_file(filename):
+    basedir = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                           current_app.config['UPLOAD_FOLDER'])
+    return send_from_directory(basedir, filename)
+
+
+@login_required
+def upload_profile_image():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+
+        file = request.files['file']
+
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+
+        if file.filename.split('.')[-1] not in current_app.config['ALLOWED_EXTENSIONS']:
+            flash('File dismissed (format error)!')
+            return redirect(request.url)
+
+        if file:
+            basedir = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                   current_app.config['UPLOAD_FOLDER'])
+
+            filename = 'profile-{}.{}'.format(current_user.id, file.filename.rsplit('.', 1)[-1])
+
+            if not os.path.isdir(basedir):
+                os.mkdir(basedir)
+
+            file.save(os.path.join(basedir, filename))
+
+            current_user.picture = filename
+            current_user.save()
+
+            return redirect(url_for('cookbook.profile_page'))
+
+    else:
+        return '''
+            <!doctype html>
+            <title>Upload new File</title>
+            <h1>Upload new File</h1>
+            <form method=post enctype=multipart/form-data>
+              <p><input type=file name=file>
+                 <input type=submit value=Upload>
+            </form>
+            '''
 
 
 def login():

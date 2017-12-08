@@ -12,6 +12,7 @@ class Users(UserMixin, Model):
     lastname = CharField(max_length=50, null=False)
     email = CharField(max_length=80, null=False)
     password = CharField(max_length=32, null=False)  # hash of password
+    picture = CharField(max_length=100, default='default_profile.png')
 
     @staticmethod
     def create_hash(password):
@@ -51,4 +52,3 @@ class Ingredient(Model):
     name = CharField(max_length=20)
     amount = CharField(max_length=10)
     recipe = ForeignKey(Recipe, on_delete='CASCADE')
-    _user = ForeignKey(Users, on_delete='CASCADE')

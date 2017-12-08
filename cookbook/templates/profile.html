@@ -64,14 +64,28 @@ used to vertically center elements, may need modification if you're not using de
             </ul>
             <div class="box-lg" >
                 <div class="gap-small"></div>
+
+                <div class="row">
+                    <img src="{{ url_for('cookbook.uploads', filename=current_user.picture) }}" class="img-thumbnail" alt="Cinque Terre">
+                </div>
+
+                <div class="gap-small"></div>
+
                 <div class="row">
                     <div class="col-md-12">
                         <h4>{{ current_user.username }}</h4>
-                        <div class="gap-small"></div>
                     </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <p>{{ current_user.firstname }} {{ current_user.lastname }}</p>
+                    </div>
+                </div>
+
+                <div class="row">
                     <div class="col-md-12">
                         <p>{{ current_user.email }}</p>
-                        <div class="gap-small"></div>
                     </div>
                 </div>
 
