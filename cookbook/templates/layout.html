@@ -114,7 +114,7 @@
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         {% if current_user.is_authenticated %}
-                        <li><a href="{{ url_for('cookbook.profile_page') }}" data-effect="mfp-move-from-top" class="">{{ current_user.username }}</a>
+                        <li><a href="{{ url_for('cookbook.profile_page', username=current_user.username) }}" data-effect="mfp-move-from-top" class="">{{ current_user.username }}</a>
                         </li>
                         <li><a href="{{ url_for('cookbook.logout') }}" class="glyphicon glyphicon-log-out"></a>
                         </li>

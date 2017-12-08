@@ -2,62 +2,9 @@
 {% block title %}Home{% endblock %}
 {% block content %}
 <div class="gap-small"></div>
-<style>
-.panel-table .panel-body{
-  padding:0;
-}
 
-.panel-table .panel-body .table-bordered{
-  border-style: none;
-  margin:0;
-}
-
-.panel-table .panel-body .table-bordered > thead > tr > th:first-of-type {
-    text-align:center;
-    width: 100px;
-}
-
-.panel-table .panel-body .table-bordered > thead > tr > th:last-of-type,
-.panel-table .panel-body .table-bordered > tbody > tr > td:last-of-type {
-  border-right: 0px;
-}
-
-.panel-table .panel-body .table-bordered > thead > tr > th:first-of-type,
-.panel-table .panel-body .table-bordered > tbody > tr > td:first-of-type {
-  border-left: 0px;
-}
-
-.panel-table .panel-body .table-bordered > tbody > tr:first-of-type > td{
-  border-bottom: 0px;
-}
-
-.panel-table .panel-body .table-bordered > thead > tr:first-of-type > th{
-  border-top: 0px;
-}
-
-.panel-table .panel-footer .pagination{
-  margin:0;
-}
-
-/*
-used to vertically center elements, may need modification if you're not using default sizes.
-*/
-.panel-table .panel-footer .col{
- line-height: 34px;
- height: 34px;
-}
-
-.panel-table .panel-heading .col h3{
- line-height: 30px;
- height: 30px;
-}
-
-.panel-table .panel-body .table-bordered > tbody > tr > td{
-  line-height: 34px;
-}
-</style>
 <div class="row" data-gutter="15">
-    <div class="col-md-2 col-md-offset-2">
+    <div class="col-md-3 col-md-offset-2">
         <div class="product">
             <ul class="product-labels">
                 <li>Profile</li>
@@ -66,30 +13,74 @@ used to vertically center elements, may need modification if you're not using de
                 <div class="gap-small"></div>
 
                 <div class="row">
-                    <img src="{{ url_for('cookbook.uploads', filename=current_user.picture) }}" class="img-thumbnail" alt="Cinque Terre">
+                    <img src="{{ url_for('cookbook.uploads', filename=user.picture) }}" class="img-thumbnail" alt="Cinque Terre">
                 </div>
 
                 <div class="gap-small"></div>
 
                 <div class="row">
-                    <div class="col-md-12">
-                        <h4>{{ current_user.username }}</h4>
+                    <div class="col-md-12 text-center">
+                        <h4>
+                            {{ user.firstname }} {{ user.lastname }}
+                        </h4>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-12">
-                        <p>{{ current_user.firstname }} {{ current_user.lastname }}</p>
+                    <div class="col-md-12 text-center">
+                        <p>
+                            <a href="{{ url_for('cookbook.profile_page', username=user.username) }}" style="color: darkslategray">
+                                @{{ user.username }}
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row panel panel-default" >
+
+                    <div class="col-md-4 panel-heading">
+                        <p class="text-center">Followers</p>
+                    </div>
+
+                    <div class="col-md-4 panel-heading">
+                        <p class="text-center">Followings</p>
+                    </div>
+
+                    <div class="col-md-4 panel-heading">
+                        <p class="text-center">Likes</p>
+                    </div>
+
+
+                    <div class="col-md-4 panel-body">
+                        <h4 class="text-center">{{ followers|count }}</h4>
+                    </div>
+
+                    <div class="col-md-4 panel-body">
+                        <h4 class="text-center">{{ following|count }}</h4>
+                    </div>
+
+                    <div class="col-md-4 panel-body">
+                        <h4 class="text-center">{{ following|count }}</h4>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-12">
-                        <p>{{ current_user.email }}</p>
+
+                    <div class="col-md-6 text-center">
+                        <a href="mailto:{{ user.email }}" class="btn btn-success btn-group-justified">
+                            <span class="glyphicon glyphicon-send"></span>
+                            Message
+                        </a>
+                    </div>
+
+                    <div class="col-md-6 text-center">
+                        <a href="mailto:{{ user.email }}" class="btn btn-info btn-group-justified">
+                            <span class="glyphicon glyphicon-envelope"></span>
+                            Send Mail
+                        </a>
                     </div>
                 </div>
 
-                <div class="gap-small"></div>
             </div>
         </div>
     </div>
