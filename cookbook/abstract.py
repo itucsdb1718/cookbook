@@ -43,8 +43,10 @@ class Model(object):
             connection.commit()
 
     @classmethod
-    def get_fields(cls):
-        return ['id'] + [name for name in cls.__dict__ if hasattr(cls.__dict__[name], '__sql__')]
+    def get_fields(cls, prefix=None):
+        return ['%s.id'%cls.__name__ if prefix else 'id'] + \
+               ['%s.%s'%(cls.__name__, name) if prefix else name
+                for name in cls.__dict__ if hasattr(cls.__dict__[name], '__sql__')]
 
     @classmethod
     def get(cls, limit=1, order_by=None, select_related=(), prefetch=None, **kwargs):
