@@ -50,24 +50,33 @@
                         <p class="text-center">Likes</p>
                     </div>
 
-
                     <div class="col-md-4 panel-body">
-                        <h4 class="text-center">{{ followers|count }}</h4>
+                        <h4 class="text-center">
+                            <a href="#followers-dialog" data-effect="mfp-move-from-top"
+                               class="popup-text" style="color: black; font-size: large">
+                                {{ followers|count }}
+                            </a>
+                        </h4>
                     </div>
 
                     <div class="col-md-4 panel-body">
-                        <h4 class="text-center">{{ following|count }}</h4>
+                        <h4 class="text-center">
+                            <a href="#following-dialog" data-effect="mfp-move-from-top"
+                               class="popup-text" style="color: black; font-size: large">
+                                {{ following|count }}
+                            </a>
+                        </h4>
                     </div>
 
                     <div class="col-md-4 panel-body">
-                        <h4 class="text-center">{{ following|count }}</h4>
+                        <h4 class="text-center">0</h4>
                     </div>
                 </div>
 
                 <div class="row">
 
                     <div class="col-md-6 text-center">
-                        <a href="mailto:{{ user.email }}" class="btn btn-success btn-group-justified">
+                        <a href="{{ url_for('cookbook.message_page', username=user.username) }}" class="btn btn-success btn-group-justified">
                             <span class="glyphicon glyphicon-send"></span>
                             Message
                         </a>
@@ -78,6 +87,36 @@
                             <span class="glyphicon glyphicon-envelope"></span>
                             Send Mail
                         </a>
+                    </div>
+                </div>
+
+                <div class="mfp-with-anim mfp-hide mfp-dialog clearfix" id="following-dialog">
+                    <h3 class="widget-title">Following</h3>
+
+                    <div class="col-md-12 text-center">
+                        {% for rel in following %}
+                            <p>
+                                <a href="{{ url_for('cookbook.profile_page', username=rel._to.username) }}"
+                                   style="color: darkslategray">
+                                    {{ rel._to.firstname }} {{ rel._to.lastname }} @{{ rel._to.username }}
+                                </a>
+                            </p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mfp-with-anim mfp-hide mfp-dialog clearfix" id="followers-dialog">
+                    <h3 class="widget-title">Following</h3>
+
+                    <div class="col-md-12 text-center">
+                        {% for rel in followers %}
+                            <p>
+                                <a href="{{ url_for('cookbook.profile_page', username=rel._from.username) }}"
+                                   style="color: darkslategray">
+                                    {{ rel._from.firstname }} {{ rel._from.lastname }} @{{ rel._from.username }}
+                                </a>
+                            </p>
+                        {% endfor %}
                     </div>
                 </div>
 
@@ -123,7 +162,7 @@
                         </form>
                     </div>
                 </div>
-        </div>
+            </div>
         <div class="gap-small"></div>
         {% endfor %}
     </div>

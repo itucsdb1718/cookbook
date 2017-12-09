@@ -1,0 +1,96 @@
+/* Chat containers */
+
+.chat-frame{
+    border: 2px solid #dedede;
+    padding: 2%;
+    overflow-y: scroll;
+    height:500px;
+}
+
+.chat-container {
+    border: 2px solid #dedede;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    padding: 10px;
+    padding-left: 3%;
+    padding-right: 3%;
+    margin: 10px;
+    width: 80%;
+}
+
+/* Darker chat container */
+.darker {
+    float: right;
+    border-color: #ccc;
+    background-color: #ddd;
+}
+
+/* Clear floats */
+.chat-container::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+/* Style images */
+.chat-container img {
+    float: left;
+    max-width: 65px;
+    width: 100%;
+    margin-right: 10px;
+    border-radius: 20%;
+}
+
+/* Style the right image */
+.chat-container img.right {
+    float: right;
+    margin-left: 20px;
+    margin-right:0;
+}
+
+/* Style time text */
+.time-right {
+    float: right;
+    color: #aaa;
+}
+
+/* Style time text */
+.time-left {
+    float: left;
+    color: #999;
+}
+
+
+.macro{
+    margin-top:5px;
+    border-radius:5px;
+    padding:5px;
+    display:flex;
+}
+
+.msj-rta{
+    background:whitesmoke;
+}
+
+.text{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+}
+
+.text-r{
+    float:right;
+    padding-left:10px;
+    padding-right:10px;
+}
+
+.entry-box{
+    border:0;
+    padding:10px;
+    background:whitesmoke;
+}
+
+.entry-box:focus{
+    outline: none !important;
+    border:transparent;
+}
