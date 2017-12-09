@@ -178,12 +178,6 @@ class Ingredient(Model):
     recipe = ForeignKey(Recipe, on_delete='CASCADE')
 
 
-class Post(Model):
-    _user = ForeignKey(Users, on_delete='CASCADE')
-    recipe = ForeignKey(Recipe, on_delete='CASCADE')
-    created_at = DateTimeField(auto_now=True)
-
-
 class Relation(Model):
     _from = ForeignKey(Users, on_delete='CASCADE')
     _to = ForeignKey(Users, on_delete='CASCADE')
@@ -193,4 +187,15 @@ class Comment(Model):
     _user = ForeignKey(Users, on_delete='CASCADE')
     recipe = ForeignKey(Recipe, on_delete='CASCADE')
     text = CharField(max_length=140)
+    created_at = DateTimeField(auto_now=True)
+
+
+class Notification(Model):
+    _from = ForeignKey(Users, on_delete='CASCADE')
+    _to = ForeignKey(Users, on_delete='CASCADE')
+
+    link = CharField(max_length=70)
+    title = CharField(max_length=50)
+    content = CharField(max_length=140)
+    read = IntegerField(default=0)
     created_at = DateTimeField(auto_now=True)

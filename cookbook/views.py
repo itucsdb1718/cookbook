@@ -6,17 +6,16 @@ from flask.helpers import url_for
 from flask import render_template, redirect, flash, abort, Response
 from flask import request, current_app, send_from_directory
 from flask_login.utils import login_required, login_user, current_user, logout_user
-
 from psycopg2 import IntegrityError
 
-from .models import Ingredient, Recipe, Users, Message, Post, Relation, Comment
+from .models import Ingredient, Recipe, Users, Message, Relation, Comment, Notification
 
 
 def initdb():
-    for model in [Users, Recipe, Ingredient, Message, Post, Relation, Comment]:
+    for model in [Users, Recipe, Ingredient, Message, Relation, Comment, Notification]:
         model.drop()
 
-    for model in [Users, Recipe, Ingredient, Message, Post, Relation, Comment]:
+    for model in [Users, Recipe, Ingredient, Message, Relation, Comment, Notification]:
         model.create()
 
     emre = Users(username='KEO', firstname='Kadir Emre', lastname='Oto', email='otok@itu.edu.tr')
@@ -78,7 +77,25 @@ def initdb():
         Comment(_user=suheyl, recipe=recipe3, text='nononono'),
     ]
 
-    for c in comments: c.save()
+    for c in comments:
+        c.save()
+
+    notifications = [
+        Notification(_from=emre, _to=suheyl, title='You have a new message!',
+                     content='Selam Süheyl :D', link=url_for('cookbook.message_page', username=suheyl.username)),
+
+        Notification(_from=emre, _to=suheyl, title='You have a new message!',
+                     content='Test message'*7, link=url_for('cookbook.message_page', username=suheyl.username)),
+
+        Notification(_from=suheyl, _to=emre, title='Your recipe has new comment!',
+                     content='Test message 1', link=url_for('cookbook.message_page', username=emre.username)),
+
+        Notification(_from=suheyl, _to=emre, title='Your recipe has new comment!',
+                     content='Test message 2', link=url_for('cookbook.message_page', username=emre.username))
+    ]
+
+    for n in notifications:
+        n.save()
 
     return redirect(url_for('cookbook.home_page'))
 
@@ -301,6 +318,22 @@ def upload_profile_image():
                  <input type=submit value=Upload>
             </form>
             '''
+
+
+@login_required
+def notification(id):
+    item = Notification.get(limit=1, id=id, select_related='_to')
+    if not item:
+        abort(400)  # Bad Request
+
+    item = item[0]
+    if item._to.id != current_user.id:
+        abort(400)  # Bad Request
+
+    item.read = 1
+    item.save()
+
+    return redirect(item.link)
 
 
 def login():
