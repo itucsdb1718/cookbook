@@ -32,12 +32,31 @@ def initdb():
 
     message = Message(_from=emre, _to=suheyl, content='Test Message 123')
     message.save()
+
+    recipe = Recipe(_user=suheyl, name='kuru fasulye', description='mertcan')
+    recipe.save()
+
+    Ingredient(recipe=recipe, name='fasulye', amount='1 kg').save()
+    Ingredient(recipe=recipe, name='kuru', amount='sonsuz').save()
+
+    recipe = Recipe(_user=suheyl, name='böfstrogonof', description='böf')
+    recipe.save()
+
+    Ingredient(recipe=recipe, name='böf', amount='1 kg').save()
+    Ingredient(recipe=recipe, name='strogonof', amount='sonsuz').save()
+
+    recipe = Recipe(_user=suheyl, name='su', description='iç')
+    recipe.save()
+
+    Ingredient(recipe=recipe, name='su', amount='1 Lt').save()
+
     return redirect(url_for('cookbook.home_page'))
 
 
 def home_page():
     now = datetime.datetime.now()
-    return render_template('layout.html', current_time=now.ctime())
+    recipes = Recipe.get(limit=None, prefetch=Ingredient.recipe, select_related='_user')
+    return render_template('home.html', current_time=now.ctime(), recipes=recipes)
 
 
 @login_required
@@ -47,7 +66,38 @@ def profile_page():
 
 
 def recipes_page():
-    recipes = Recipe.get(limit=None, order_by='-description', prefetch=Ingredient.recipe)
+
+    if request.method == 'POST':
+
+        name = request.form.get('recipe-name', '')
+        desc = request.form.get('desc', '')
+
+        if len(name) < 2 or len(name) >= 50 or len(desc) >= 1000:
+            return redirect('cookbook:recipes_page')
+
+        recipe = Recipe(name=name, description=desc, _user=current_user)
+
+        ingredients = []
+        names = request.form.getlist('ing_name')
+        amounts = request.form.getlist('ing_amount')
+
+        if len(names) != len(amounts):
+            return redirect('cookbook:recipes_page')
+
+        for name, amount in zip(names,amounts):
+            if len(name) < 2 or len(name) >= 20 \
+                    or len(amount) < 1 or len(amount) >= 10:
+                return redirect('cookbook:recipes_page')
+            ingredients.append(Ingredient(name=name, amount=amount, recipe=recipe))
+
+        if not ingredients:
+            return redirect('cookbook:recipes_page')
+
+        recipe.save()
+        for i in ingredients:
+            i.save()
+
+    recipes = Recipe.get(limit=None, order_by='-created_at', _user=current_user, prefetch=Ingredient.recipe)
     return render_template('recipes.html', recipes=recipes)
 
 

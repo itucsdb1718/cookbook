@@ -7,7 +7,7 @@ import os
 
 
 dsn = """user='{}' password='{}' host='{}' port={}
-         dbname='{}'""".format('postgres', 'psql123', 'localhost', '5432', 'cookbook_db')
+         dbname='{}'""".format('postgres', 'suheyl123', 'localhost', '5432', 'cookbook_db')
 
 app = Flask(__name__, static_folder=None)
 app.register_blueprint(cookbook)
