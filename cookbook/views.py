@@ -73,7 +73,7 @@ def initdb():
         Comment(_user=suheyl, recipe=recipe1, text='nononono'),
         Comment(_user=suheyl, recipe=recipe2, text='such a great recipe!'),
         Comment(_user=emre, recipe=recipe2, text='this is bad'),
-        Comment(_user=suheyl, recipe=recipe2, text='nononono'),
+        Comment(_user=suheyl, recipe=recipe3, text='nononono'),
     ]
 
     for c in comments: c.save()
@@ -82,11 +82,10 @@ def initdb():
 
 
 def home_page():
-    now = datetime.datetime.now()
-    recipes = Recipe.get(limit=None, prefetch=Ingredient.recipe, select_related='_user')
+    recipes = Recipe.get(limit=None, select_related='_user', prefetch=Ingredient.recipe)
     for recipe in recipes:
-        recipe.comments = Comment.get(limit=None, recipe=recipe, order_by='created_at', select_related='_user')
-    return render_template('home.html', current_time=now.ctime(), recipes=recipes)
+        recipe.comments = Comment.get(limit=None, order_by='created_at', recipe=recipe, select_related='_user')
+    return render_template('home.html', recipes=recipes)
 
 
 @login_required
@@ -101,6 +100,7 @@ def add_comment():
             return Response('success')
         return Response('failure')
 
+
 def profile_page(username):
     user = Users.get(limit=1, username=username)
     if not user:
@@ -108,6 +108,9 @@ def profile_page(username):
 
     user = user[0]
     recipes = Recipe.get(limit=None, _user=user, prefetch=Ingredient.recipe)
+
+    for recipe in recipes:
+        recipe.comments = Comment.get(limit=None, order_by='created_at', recipe=recipe, select_related='_user')
 
     followers = user.get_followers()
     following = user.get_followings()
@@ -230,6 +233,23 @@ def recipes_page():
 
     recipes = Recipe.get(limit=None, order_by='-created_at', _user=current_user, prefetch=Ingredient.recipe)
     return render_template('recipes.html', recipes=recipes)
+
+
+def recipe_page(recipe_id):
+    recipe = Recipe.get(limit=None, id=recipe_id, select_related='_user', prefetch=Ingredient.recipe)[0]
+    recipe.comments = Comment.get(limit=None, recipe=recipe, select_related='_user')
+    if not recipe:
+        return redirect(url_for('cookbook.recipes_page'))
+
+    return render_template('recipe.html', recipe=recipe)
+
+
+def delete_recipe(recipe_id):
+    recipe = Recipe.get(limit=None, id=recipe_id, select_related='_user')[0]
+    if recipe._user == current_user:
+        # Delete model
+        recipe.delete()
+    return redirect(url_for('cookbook.recipes_page'))
 
 
 def uploaded_file(filename):

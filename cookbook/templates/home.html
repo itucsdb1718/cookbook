@@ -6,9 +6,9 @@
 
 {% for recipe in recipes %}
     <div class="row">
-        <div class="col-md-8 col-md-offset-2">
+        <div class="col-md-6 col-md-offset-3">
             <div class="product">
-                <ul class="product-labels">
+                <ul class="clickable product-labels" onclick="window.location.href = '{{ url_for('cookbook.recipe_page', recipe_id=recipe.id) }}'">
                     <li>{{ recipe.name }}</li>
                 </ul>
 
@@ -51,7 +51,7 @@
                     <div class="panel-body">
                         <div class="panel-body">
                             <div class="row">
-                                <div class="col col-xs-4">
+                                <div class="col col-xs-3">
                                     <h4 class="">Description</h4>
                                 </div>
                             </div>
@@ -63,6 +63,7 @@
                         </div>
                     </div>
                 </div>
+
             <h5 class="" {% if recipe.comments %}{% else %}hidden{% endif %}>
                 <a href="#comment-{{ loop.index }}" class="btn btn-sm" data-toggle="collapse">Show Comments</a>
             </h5>
@@ -97,25 +98,4 @@
     </div>
 <div class="gap-small"></div>
 {% endfor %}
-
-<script src="{{ url_for('cookbook.static', filename='js/jquery.js') }}"></script>
-
-<script type="text/javascript">
-    $(document).ready(function(){
-        $(".comment-button").click(function(self){
-            console.log(self.target.id);
-            console.log(self.target.parentNode.parentNode.childNodes[1]);
-            $.post({{ url_for('cookbook.add_comment') }},
-            {
-                recipe: self.target.id,
-                text: self.target.parentNode.parentNode.childNodes[1].value
-            },
-            function(data,status){
-                if (data === 'success') {
-                    window.location.href = '/';
-                }
-            });
-        });
-    });
-</script>
 {% endblock %}

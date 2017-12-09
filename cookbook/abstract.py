@@ -195,6 +195,18 @@ class Model(object):
 
         self.id = self.id if self.id else cursor.fetchone()[0]
 
+    def delete(self):
+
+        if self.id == 0:
+            return
+
+        statement = 'DELETE FROM {} WHERE (id = %s)'.format(self.__class__.__name__)
+
+        with dbapi2.connect(current_app.config['dsn']) as connection:
+            cursor = connection.cursor()
+            cursor.execute(statement, [self.id])
+            connection.commit()
+
 
 class BaseField:
     def __get__(self, instance, owner):
