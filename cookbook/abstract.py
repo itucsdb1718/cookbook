@@ -165,7 +165,7 @@ class Model(object):
             if name != 'id' and hasattr(fields[name], '__sql__'):
                 value = getattr(self, name)
 
-                if isinstance(value, Model):
+                if isinstance(value, (Model, current_user.__class__)):
                     value = value.id
 
                 if value is not None:
