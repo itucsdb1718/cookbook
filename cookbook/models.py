@@ -12,6 +12,7 @@ class Users(UserMixin, Model):
     lastname = CharField(max_length=50, null=False)
     email = CharField(max_length=80, null=False)
     password = CharField(max_length=32, null=False)  # hash of password
+    picture = CharField(max_length=100, default='default_profile.png')
 
     @staticmethod
     def create_hash(password):
@@ -32,6 +33,21 @@ class Users(UserMixin, Model):
     def get_id(self):
         return self.id
 
+    def follow(self, user):
+        relation = Relation.get(limit=1, _from=self, _to=user)
+
+        if not relation:
+            relation = Relation(_from=self, _to=user)
+            relation.save()
+
+    def get_followers(self):
+        followers = Relation.get(limit=None, _to=self)
+        return followers
+
+    def get_followings(self):
+        followings = Relation.get(limit=None, _from=self)
+        return followings
+
 
 class Message(Model):
     _from = ForeignKey(Users, on_delete='CASCADE')
@@ -51,4 +67,14 @@ class Ingredient(Model):
     name = CharField(max_length=20)
     amount = CharField(max_length=10)
     recipe = ForeignKey(Recipe, on_delete='CASCADE')
+
+
+class Post(Model):
     _user = ForeignKey(Users, on_delete='CASCADE')
+    recipe = ForeignKey(Recipe, on_delete='CASCADE')
+    created_at = DateTimeField(auto_now=True)
+
+
+class Relation(Model):
+    _from = ForeignKey(Users, on_delete='CASCADE')
+    _to = ForeignKey(Users, on_delete='CASCADE')

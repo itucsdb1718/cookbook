@@ -1,16 +1,24 @@
-from flask import Flask
-from cookbook import cookbook, models
-from flask_login import LoginManager
 import json
 import re
 import os
+
+from flask import Flask
+from cookbook import cookbook, models
+from flask_login import LoginManager
 
 
 dsn = """user='{}' password='{}' host='{}' port={}
          dbname='{}'""".format('postgres', 'suheyl123', 'localhost', '5432', 'cookbook_db')
 
+UPLOAD_FOLDER = 'uploads/'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+
 app = Flask(__name__, static_folder=None)
 app.register_blueprint(cookbook)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['ALLOWED_EXTENSIONS'] = ALLOWED_EXTENSIONS
 
 app.secret_key = 'sdgfsdyfbhsdfysd'
 
