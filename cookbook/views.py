@@ -132,7 +132,29 @@ def profile_page(username):
     followers = user.get_followers()
     following = user.get_followings()
 
+    followed = False
+
+    if not current_user.is_anonymous:
+        for u in followers:
+            if u._from.id == current_user.id:
+                followed = True
+                break
+    print(followed)
     return render_template('profile.html', **locals())
+
+
+@login_required
+def follow(user_id):
+    print('FOLLOW:', user_id)
+    current_user.follow(user_id)
+    return redirect(request.referrer)
+
+
+@login_required
+def unfollow(user_id):
+    print('UNFOLLOW:', user_id)
+    current_user.unfollow(user_id)
+    return redirect(request.referrer)
 
 
 def message_page(username):

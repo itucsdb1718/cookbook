@@ -83,10 +83,17 @@
                     </div>
 
                     <div class="col-md-6 text-center">
-                        <a href="mailto:{{ user.email }}" class="btn btn-info btn-group-justified">
-                            <span class="glyphicon glyphicon-envelope"></span>
-                            Send Mail
-                        </a>
+                        {% if current_user.is_authenticated and followed %}
+                            <a href="{{ url_for('cookbook.unfollow', user_id=user.id) }}" class="btn btn-warning btn-group-justified">
+                                <span class="glyphicon glyphicon-plus-sign"></span>
+                                Unfollow
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('cookbook.follow', user_id=user.id) }}" class="btn btn-info btn-group-justified">
+                                <span class="glyphicon glyphicon-plus"></span>
+                                Follow
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
 
