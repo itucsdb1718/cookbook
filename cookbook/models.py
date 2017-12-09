@@ -33,11 +33,23 @@ class Users(UserMixin, Model):
         return self.id
 
     def follow(self, user):
+        if (isinstance(user, self.__class__) and self.id == user.id) or self.id == int(user):
+            return
+
         relation = Relation.get(limit=1, _from=self, _to=user)
 
         if not relation:
             relation = Relation(_from=self, _to=user)
             relation.save()
+
+    def unfollow(self, user):
+        if (isinstance(user, self.__class__) and self.id == user.id) or self.id == int(user):
+            return
+
+        relation = Relation.get(limit=1, _from=self, _to=user)
+
+        if relation:
+            relation[0].delete()
 
     def get_followers(self):
         followers = Relation.get(limit=None, _to=self, select_related=('_from', '_to'))
