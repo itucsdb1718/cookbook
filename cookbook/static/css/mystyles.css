@@ -1,6 +1,10 @@
 /*YOUR CUSTOM STYLES*/
 {% load staticfiles %}
 /* Multiple selection with different styles */
+.clickable:hover {
+    cursor: pointer;
+}
+
 .btn-select {
     position: relative;
     padding: 0;

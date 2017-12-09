@@ -6,6 +6,7 @@ from . import views
 
 cookbook.add_url_rule('/', view_func=views.home_page)
 
+cookbook.add_url_rule('/add_comment/', view_func=views.add_comment, methods=['GET', 'POST'])
 cookbook.add_url_rule('/<username>/', view_func=views.profile_page)
 
 cookbook.add_url_rule('/messages/<username>/', view_func=views.message_page)

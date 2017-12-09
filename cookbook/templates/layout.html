@@ -105,7 +105,11 @@
                 </div>
                 <div class="collapse navbar-collapse" id="main-nav-collapse">
                     <ul class="nav navbar-nav">
-                        <li class="dropdown"><a href="{{ url_for('cookbook.recipes_page') }}"> Recipes<i class="drop-caret" data-toggle="dropdown"></i></a>
+                        <li class="dropdown">
+                            <a href="{{ url_for('cookbook.recipes_page') }}"> Recipes<i class="drop-caret" data-toggle="dropdown"></i></a>
+                        </li>
+                        <li class="dropdown">
+                            <a href="{{ url_for('cookbook.profile_page', username=current_user.username) }}">Profile<i class="drop-caret" data-toggle="dropdown"></i></a>
                         </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
