@@ -1,5 +1,4 @@
-import psycopg2 as dbapi2
-
+from collections import defaultdict
 from .abstract import *
 from hashlib import md5
 
@@ -98,6 +97,79 @@ class Recipe(Model):
     _user = ForeignKey(Users, on_delete='CASCADE')
     description = CharField(max_length=1000)
     created_at = DateTimeField(auto_now=True)
+
+    @classmethod
+    def get_followings_posts(cls, _user):
+
+        recipe_fields = Recipe.get_fields(prefix=True)
+        user_fields = Users.get_fields(prefix=True)
+        ingredient_fields = Ingredient.get_fields(prefix=True)
+        comment_fields = Comment.get_fields(prefix=True)
+
+        s = """SELECT {} FROM recipe 
+                INNER JOIN users ON (users.id = recipe._user)
+                INNER JOIN ingredient ON (recipe.id = ingredient.recipe)
+                LEFT OUTER JOIN comment ON (comment.recipe = recipe.id)
+                WHERE users.id IN 
+                    (SELECT (relation._to) FROM relation WHERE (relation._from = %s))
+                ORDER BY recipe.created_at ASC, comment.created_at ASC"""
+
+        s = s.format(','.join(recipe_fields + user_fields + ingredient_fields + comment_fields))
+
+        with dbapi2.connect(current_app.config['dsn']) as connection:
+            cursor = connection.cursor()
+            cursor.execute(s, (_user.id,))
+
+            rows = cursor.fetchall()
+
+        output = []
+        out_index = {}
+        ingredient_set = defaultdict(set)
+        comment_set = defaultdict(set)
+
+        for row in rows:
+            i = 0
+            instance = cls()
+            for field in recipe_fields:
+                setattr(instance, field.split('.')[1], row[i])
+                i += 1
+
+            instance._user = Users()
+            for field in user_fields:
+                setattr(instance._user, field.split('.')[1], row[i])
+                i += 1
+
+            instance.ingredient_set = []
+            instance.comments = []
+
+            if instance.id not in out_index:
+                out_index[instance.id] = len(output)
+                output.append(instance)
+            else:
+                instance = output[out_index[instance.id]]
+
+            ingredient = Ingredient()
+            for field in ingredient_fields:
+                setattr(ingredient, field.split('.')[1], row[i])
+                i += 1
+
+            if ingredient.id not in ingredient_set[instance.id]:
+                ingredient_set[instance.id].add(ingredient.id)
+                instance.ingredient_set.append(ingredient)
+
+            comment = Comment()
+            for field in comment_fields:
+                setattr(comment, field.split('.')[1], row[i])
+                i += 1
+
+            if not comment.id:
+                continue
+
+            if comment.id not in comment_set[instance.id]:
+                comment_set[instance.id].add(comment.id)
+                instance.comments.append(comment)
+
+        return output
 
 
 class Ingredient(Model):
