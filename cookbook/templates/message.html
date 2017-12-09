@@ -70,7 +70,7 @@
 
             <script>
                 addMessage({who: "you", text: "{{ message.content }}", time: "{{ message.created_at }}",
-                            picture: "{{ url_for('cookbook.uploads', filename=message._to.picture) }}",
+                            picture: "{{ url_for('cookbook.uploads', filename=message._from.picture) }}",
                             viewed: {{ message.read }} });
                 mark_as_read({{ message._to.id }});
             </script>

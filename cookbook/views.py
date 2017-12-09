@@ -18,7 +18,7 @@ def initdb():
         model.create()
 
     emre = Users(username='KEO', firstname='Kadir Emre', lastname='Oto', email='otok@itu.edu.tr')
-    suheyl = Users(username='sühül', lastname='Karabela', email='karabela@itu.edu.tr')
+    suheyl = Users(username='sühül', firstname='Süheyl', lastname='Karabela', email='karabela@itu.edu.tr')
 
     emre.set_password("emre123")
     suheyl.set_password("suhul123")
@@ -38,8 +38,8 @@ def initdb():
     message.save()
 
     Message(_from=emre, _to=suheyl, content='Test Message2 123', read=1).save()
-    Message(_from=suheyl, _to=emre, content='Test Message3 123').save()
-    Message(_from=emre, _to=emre, content='Test Message4 123').save()
+    Message(_from=suheyl, _to=emre, content='Test Message3 123', read=1).save()
+    Message(_from=emre, _to=emre, content='Test Message4 123', read=1).save()
 
     recipe1 = Recipe(name='Kuru Fasülye', description='Mertcaaaaan', _user=emre)
     recipe2 = Recipe(name='Cacık', description='Short Description 3', _user=emre)
