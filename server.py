@@ -8,10 +8,11 @@ from flask_login import LoginManager
 
 
 dsn = """user='{}' password='{}' host='{}' port={}
-         dbname='{}'""".format('KEO', 'keo123', 'localhost', '5432', 'cookbook_db')
+         dbname='{}'""".format('postgres', 'suheyl123', 'localhost', '5432', 'cookbook_db')
 
 UPLOAD_FOLDER = 'uploads/'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
 
 app = Flask(__name__, static_folder=None)
 app.register_blueprint(cookbook)
