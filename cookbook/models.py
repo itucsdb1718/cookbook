@@ -78,3 +78,10 @@ class Post(Model):
 class Relation(Model):
     _from = ForeignKey(Users, on_delete='CASCADE')
     _to = ForeignKey(Users, on_delete='CASCADE')
+
+
+class Comment(Model):
+    _user = ForeignKey(Users, on_delete='CASCADE')
+    recipe = ForeignKey(Recipe, on_delete='CASCADE')
+    text = CharField(max_length=140)
+    created_at = DateTimeField(auto_now=True)
