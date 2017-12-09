@@ -6,6 +6,7 @@ from flask.helpers import url_for
 from flask import render_template, redirect, flash, abort, Response
 from flask import request, current_app, send_from_directory
 from flask_login.utils import login_required, login_user, current_user, logout_user
+from psycopg2 import IntegrityError
 
 from .models import Ingredient, Recipe, Users, Message, Relation, Comment, Notification
 
@@ -100,9 +101,7 @@ def initdb():
 
 
 def home_page():
-    recipes = Recipe.get(limit=None, select_related='_user', prefetch=Ingredient.recipe)
-    for recipe in recipes:
-        recipe.comments = Comment.get(limit=None, order_by='created_at', recipe=recipe, select_related='_user')
+    recipes = Recipe.get_followings_posts(current_user)
     return render_template('home.html', recipes=recipes)
 
 
@@ -216,7 +215,7 @@ def add_message():
 
     return 'true'
 
-
+@login_required
 def recipes_page():
 
     if request.method == 'POST':
@@ -261,7 +260,7 @@ def recipe_page(recipe_id):
 
     return render_template('recipe.html', recipe=recipe)
 
-
+@login_required
 def delete_recipe(recipe_id):
     recipe = Recipe.get(limit=None, id=recipe_id, select_related='_user')[0]
     if recipe._user == current_user:
@@ -352,7 +351,8 @@ def login():
             return redirect(request.referrer)
 
         else:
-            error = 'Invalid credentials'
+            flash('Username or password incorrect')
+            return redirect(url_for('cookbook.home_page'))
 
     return redirect(url_for('cookbook.profile_page'))
 
@@ -360,5 +360,39 @@ def login():
 def logout():
     if current_user is not None:
         logout_user()
+
+    return redirect(url_for('cookbook.home_page'))
+
+def register():
+    if request.method == 'POST' and current_user.is_anonymous:
+
+        username = request.form.get('username', '')
+
+        if len(username) < 3 or len(username) >= 50 \
+                or request.form.get('password', '1') != request.form.get('password2', '2') \
+                or 3 > len(request.form.get('password', '')):
+            flash('Invalid form')
+            return redirect(url_for('cookbook.home_page'))
+
+        user = Users.get(limit=1, username=username)
+        if user:
+            flash('Username taken')
+            return redirect(url_for('cookbook.home_page'))
+
+        user = Users(username=username,
+                     firstname=request.form.get('first-name', ''),
+                     lastname=request.form.get('last-name', ''),
+                     email=request.form.get('email'))
+        user.set_password(request.form.get('password'))
+
+        try:
+            user.save()
+        except IntegrityError as e:
+            flash('Form invalid')
+            print(e)
+            return redirect(url_for('cookbook.home_page'))
+
+        login_user(user)
+        return redirect(request.referrer)
 
     return redirect(url_for('cookbook.home_page'))

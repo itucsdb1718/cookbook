@@ -2,7 +2,7 @@ import json
 import re
 import os
 
-from flask import Flask
+from flask import Flask, redirect, url_for
 from cookbook import cookbook, models
 from flask_login import LoginManager
 
@@ -54,6 +54,11 @@ def utility_processor():
         return n
 
     return dict(notifications=notifications)
+
+  
+@login_manager.unauthorized_handler
+def unauthorized():
+    return redirect(url_for('cookbook.home_page'))
 
 
 if __name__ == '__main__':

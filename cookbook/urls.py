@@ -25,4 +25,6 @@ cookbook.add_url_rule('/upload/', view_func=views.upload_profile_image, methods=
 
 cookbook.add_url_rule('/login/', view_func=views.login, methods=['POST'])
 cookbook.add_url_rule('/logout/', view_func=views.logout)
+cookbook.add_url_rule('/register/', view_func=views.register, methods=['POST'])
+
 cookbook.add_url_rule('/initdb/', view_func=views.initdb)
