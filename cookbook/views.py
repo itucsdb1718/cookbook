@@ -1,4 +1,5 @@
 import os
+import json
 import datetime
 
 from flask.helpers import url_for
@@ -35,6 +36,10 @@ def initdb():
 
     message = Message(_from=emre, _to=suheyl, content='Test Message 123')
     message.save()
+
+    Message(_from=emre, _to=suheyl, content='Test Message2 123', read=1).save()
+    Message(_from=suheyl, _to=emre, content='Test Message3 123').save()
+    Message(_from=emre, _to=emre, content='Test Message4 123').save()
 
     recipe1 = Recipe(name='Kuru Fasülye', description='Mertcaaaaan', _user=emre)
     recipe2 = Recipe(name='Cacık', description='Short Description 3', _user=emre)
@@ -83,6 +88,87 @@ def profile_page(username):
     following = user.get_followings()
 
     return render_template('profile.html', **locals())
+
+
+def message_page(username):
+    to = Users.get(limit=1, username=username)
+    if not to:
+        abort(404)
+
+    to = to[0]
+    messages = Message.get_messages(current_user, to)
+    for message in messages:
+        message.created_at = message.created_at.strftime("%m.%d.%Y %H:%M")
+
+    return render_template('message.html', **locals())
+
+
+@login_required
+def new_messages(username):
+    to = Users.get(limit=1, username=username)
+    if not to:
+        abort(404)
+
+    output = []
+    messages = Message.get_messages(current_user, to[0], new=True)
+
+    for message in messages:
+        m = {'from': 'me',
+             'to': username,
+             'time': message.created_at.strftime("%m.%d.%Y %H:%M"),
+             'content': message.content,
+             'id': message.id,
+             'picture': url_for('cookbook.uploads', filename=current_user.picture)}
+
+        if message._from.username == username:
+            m['to'] = 'me'
+            m['from'] = username
+            m['picture'] = url_for('cookbook.uploads', filename=to[0].picture)
+
+        print(m)
+
+        output.append(m)
+    return json.dumps(output)
+
+
+@login_required
+def view_message():
+    if '_id' not in request.form:
+        abort(404)
+
+    message_id = request.form['_id']
+    message = Message.get(limit=1, id=message_id, select_related='_to')
+
+    if not message:
+        abort(404)
+
+    message = message[0]
+
+    if message._to.username == current_user.username:
+        message.read = 1
+        message.save()
+        return "true"
+
+    return "false"
+
+
+@login_required
+def add_message():
+    print(request.form, '*'*10)
+    if 'id' not in request.form or 'content' not in request.form:
+        abort(404)
+
+    to = Users.get(limit=1, id=request.form['id'])
+
+    if not to:
+        abort(404)
+
+    to = to[0]
+
+    message = Message(_from=current_user, _to=to, content=request.form['content'])
+    message.save()
+
+    return 'true'
 
 
 def recipes_page():
