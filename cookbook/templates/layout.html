@@ -108,9 +108,6 @@
                         <li class="dropdown">
                             <a href="{{ url_for('cookbook.recipes_page') }}"> Recipes<i class="drop-caret" data-toggle="dropdown"></i></a>
                         </li>
-                        <li class="dropdown">
-                            <a href="{{ url_for('cookbook.profile_page', username=current_user.username) }}">Profile<i class="drop-caret" data-toggle="dropdown"></i></a>
-                        </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         {% if current_user.is_authenticated %}
@@ -143,6 +140,26 @@
     <script src="{{ url_for('cookbook.static', filename='js/magnific.js') }}"></script>
     <script src="{{ url_for('cookbook.static', filename='js/custom.js') }}"></script>
 
+    <script src="{{ url_for('cookbook.static', filename='js/jquery.js') }}"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(".comment-button").click(function(self){
+                console.log(self.target.id);
+                console.log(self.target.parentNode.parentNode.childNodes[1]);
+                $.post({{ url_for('cookbook.add_comment') }},
+                {
+                    recipe: self.target.id,
+                    text: self.target.parentNode.parentNode.childNodes[1].value
+                },
+                function(data,status){
+                    if (data === 'success') {
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
     {% block style %}{% endblock %}
 
 </body>
