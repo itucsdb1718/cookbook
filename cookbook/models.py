@@ -41,11 +41,11 @@ class Users(UserMixin, Model):
             relation.save()
 
     def get_followers(self):
-        followers = Relation.get(limit=None, _to=self)
+        followers = Relation.get(limit=None, _to=self, select_related=('_from', '_to'))
         return followers
 
     def get_followings(self):
-        followings = Relation.get(limit=None, _from=self)
+        followings = Relation.get(limit=None, _from=self, select_related=('_from', '_to'))
         return followings
 
 
