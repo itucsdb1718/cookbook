@@ -99,7 +99,7 @@ def initdb():
 
     return redirect(url_for('cookbook.home_page'))
 
-
+@login_required
 def home_page():
     recipes = Recipe.get_followings_posts(current_user)
     return render_template('home.html', recipes=recipes)
