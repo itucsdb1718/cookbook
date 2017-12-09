@@ -8,7 +8,7 @@ from flask_login import LoginManager
 
 
 dsn = """user='{}' password='{}' host='{}' port={}
-         dbname='{}'""".format('postgres', 'suheyl123', 'localhost', '5432', 'cookbook_db')
+         dbname='{}'""".format('KEO', 'keo123', 'localhost', '5432', 'cookbook_db')
 
 UPLOAD_FOLDER = 'uploads/'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -43,6 +43,17 @@ def user_loader(user_id):
     if users:
         return users[0]
     return None
+
+
+@app.context_processor
+def utility_processor():
+    def notifications(user):
+        n = models.Notification.get(limit=None, _to=user, read=0, select_related=('_from', '_to'))
+        for i in n:
+            i.created_at = i.created_at.strftime("%d.%m.%Y %H:%m")
+        return n
+
+    return dict(notifications=notifications)
 
 
 if __name__ == '__main__':
