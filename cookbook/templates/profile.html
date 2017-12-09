@@ -60,14 +60,14 @@
                     </div>
 
                     <div class="col-md-4 panel-body">
-                        <h4 class="text-center">{{ following|count }}</h4>
+                        <h4 class="text-center">0</h4>
                     </div>
                 </div>
 
                 <div class="row">
 
                     <div class="col-md-6 text-center">
-                        <a href="mailto:{{ user.email }}" class="btn btn-success btn-group-justified">
+                        <a href="{{ url_for('cookbook.message_page', username=user.username) }}" class="btn btn-success btn-group-justified">
                             <span class="glyphicon glyphicon-send"></span>
                             Message
                         </a>

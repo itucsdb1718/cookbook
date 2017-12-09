@@ -1,0 +1,127 @@
+{% extends 'layout.html' %}
+{% block title %}Messages - {{ to.username }}{% endblock %}
+{% block content %}
+
+    <link rel="stylesheet" href="{{ url_for('cookbook.static', filename='css/message.css') }}">
+
+    <div class="gap-small"></div>
+
+    <div class="col-sm-6 col-sm-offset-3">
+        <div class="row">
+            <div class="col-sm-12 chat-frame">
+                <div class="row text-center">
+                    <p>No message found!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="gap-small"></div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="msj-rta macro" style="margin:auto">
+                    <div class="text text-r" style="background:whitesmoke !important">
+                        <input class="entry-box" placeholder="Type a message"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="{{ url_for('cookbook.static', filename='js/jquery.js') }}"></script>
+    <script src="{{ url_for('cookbook.static', filename='js/message.js') }}"></script>
+
+    <script>
+        var loaded = false;
+        function mark_as_read(message_id) {
+            $.ajax({
+                url: "{{ url_for("cookbook.view_message") }}",
+                type: "POST",
+                data: {
+                  _id: message_id // various ways to store the ID, you can choose
+                }
+            });
+        }
+
+        function create_message(user_id, content) {
+            $.ajax({
+                url: "{{ url_for("cookbook.add_message") }}",
+                type: "POST",
+                data: {
+                    id: user_id,
+                    content: content,
+                }
+            });
+        }
+    </script>
+
+    {% for message in messages %}
+
+        {% if message._from.username == current_user.username %}
+
+            <script>
+                addMessage({who: "me", text: "{{ message.content }}", time: "{{ message.created_at }}",
+                            picture: "{{ url_for('cookbook.uploads', filename=message._from.picture) }}",
+                            viewed: {{ message.read }} });
+            </script>
+
+        {% else %}
+
+            <script>
+                addMessage({who: "you", text: "{{ message.content }}", time: "{{ message.created_at }}",
+                            picture: "{{ url_for('cookbook.uploads', filename=message._to.picture) }}",
+                            viewed: {{ message.read }} });
+                mark_as_read({{ message._to.id }});
+            </script>
+
+
+        {% endif %}
+
+        <script>loaded = true;</script>
+
+    {% endfor %}
+
+    <script>
+        $(".entry-box").on("keyup", function (e) {
+            if (e.which === 13) {
+                var text = $(this).val();
+                if (text !== "") {
+                    addMessage({who: "me", text: text, time: strftime("%m.%d.%Y %H:%M"), picture: "/uploads/default_profile.png"});
+                    $(this).val('');
+                    create_message("{{ to.id }}",  text);
+                }
+            }
+        });
+    </script>
+
+
+    <script type="text/javascript">
+        var i;
+        var myVar = setInterval(myTimer, 3000);
+
+        function myTimer() {
+            if (loaded) {
+                $.ajax({
+                    url: '/new_messages/{{ to.username }}/',
+                    dataType: 'json',
+                    success: function (response) {
+                        for (i = 0; i < response.length; i++) {
+                            if (response[i]['from'] !== 'me') {
+                                addMessage({
+                                    who: response[i]['from'], text: response[i]['content'],
+                                    time: response[i]['time'],
+                                    picture: response[i]['picture'],
+                                    viewed: 0
+                                });
+
+                                mark_as_read(response[i]['id']);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+
+{% endblock %}

@@ -54,6 +54,43 @@ class Message(Model):
     _to = ForeignKey(Users, on_delete='CASCADE')
     created_at = DateTimeField(auto_now=True)
     content = CharField(max_length=1000)
+    read = IntegerField(default=0)
+
+    @staticmethod
+    def get_messages(user1, user2, new=False):
+        """
+        Special query to fetch messages between users
+        :param new: True if just new messages are needed; otherwise False
+        :return: all messages between user1 and user2
+        """
+
+        statement = "SELECT DISTINCT _from, _to, created_at, content, read, message.id FROM message " \
+                    "JOIN users ON (message._from = %s and message._to = %s) OR " \
+                    "(message._from = %s and message._to = %s) {}ORDER BY created_at"
+
+        statement = statement.format('WHERE message.read = 0' if new else '')
+
+        with dbapi2.connect(current_app.config['dsn']) as connection:
+            cursor = connection.cursor()
+            cursor.execute(statement, (user1.id, user2.id, user2.id, user1.id))
+
+            rows = cursor.fetchall()
+
+        output = []
+
+        for _from, _to, created_at, content, read, id in rows:
+            if _from == user1.id:
+                _from = user1
+                _to = user2
+
+            else:
+                _from = user2
+                _to = user1
+
+            output.append(Message(_from=_from, _to=_to, created_at=created_at,
+                                  content=content, read=read, id=id))
+
+        return output
 
 
 class Recipe(Model):
