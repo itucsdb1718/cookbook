@@ -112,7 +112,6 @@ def add_comment():
         if request.form.get('recipe', None) and request.form.get('text', None):
             recipe_id = int(request.form['recipe'].split('-')[1])
             comment = Comment(_user=current_user, recipe=recipe_id, text=request.form['text'])
-            print(comment._user, comment.recipe, comment.text)
             comment.save()
             return Response('success')
         return Response('failure')
@@ -157,6 +156,7 @@ def unfollow(user_id):
     return redirect(request.referrer)
 
 
+@login_required
 def message_page(username):
     to = Users.get(limit=1, username=username)
     if not to:
@@ -237,6 +237,7 @@ def add_message():
 
     return 'true'
 
+
 @login_required
 def recipes_page():
 
@@ -257,7 +258,7 @@ def recipes_page():
         if len(names) != len(amounts):
             return redirect('cookbook:recipes_page')
 
-        for name, amount in zip(names,amounts):
+        for name, amount in zip(names, amounts):
             if len(name) < 2 or len(name) >= 20 \
                     or len(amount) < 1 or len(amount) >= 10:
                 return redirect('cookbook:recipes_page')
@@ -281,6 +282,7 @@ def recipe_page(recipe_id):
         return redirect(url_for('cookbook.recipes_page'))
 
     return render_template('recipe.html', recipe=recipe)
+
 
 @login_required
 def delete_recipe(recipe_id):
@@ -372,7 +374,7 @@ def login():
         if users and users[0].check_password(password):
             login_user(users[0])
             flash('You were successfully logged in')
-            return redirect(url_for('cookbook.profile'))
+            return redirect(url_for('cookbook.home_page'))
 
         else:
             flash('Username or password incorrect')
@@ -419,6 +421,6 @@ def register():
             return redirect(url_for('cookbook.login'))
 
         login_user(user)
-        return redirect(url_for('cookbook.profile'))
+        return redirect(url_for('cookbook.home_page'))
 
     return redirect(url_for('cookbook.login'))
