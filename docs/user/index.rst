@@ -1,22 +1,27 @@
 User Guide
 ==========
 
-**explain how your application works from the user perspective, use
-screenshots whereever appropriate**
+**Users have to register to begin using the application.**
 
-**to add a picture, use the following example**::
 
-   .. figure:: picture.png
+   .. figure:: img/login-page.png
       :scale: 50 %
       :alt: map to buried treasure
 
-      This is the caption of the figure (a simple paragraph).
+      `Home page to unregistered users.`
+
+
+Users have to give the following information when registering:
+
+* **Username**
+* **Email**
+* **First Name**
+* **Last Name**
+
 
 .. toctree::
 
-   member1
-   member2
-   member3
-   member4
-   member5
+   Süheyl Emre Karabela
+   Kadir Emre Oto
+
    

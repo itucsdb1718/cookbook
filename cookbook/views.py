@@ -17,41 +17,59 @@ def initdb():
     for model in [Users, Recipe, Ingredient, Message, Relation, Comment, Notification]:
         model.create()
 
-    emre = Users(username='KEO', firstname='Kadir Emre', lastname='Oto', email='otok@itu.edu.tr')
-    suheyl = Users(username='sühül', firstname='Süheyl', lastname='Karabela', email='karabela@itu.edu.tr')
+    emre = Users(username='KadirEmreOto', firstname='Kadir Emre', lastname='Oto', email='otok@itu.edu.tr')
+    suheyl = Users(username='Suheyl', firstname='Süheyl Emre', lastname='Karabela', email='karabela@itu.edu.tr')
+    merdo = Users(username='Mertcan', firstname='Mertcan', lastname='Yasakçı', email='yasakci@itu.edu.tr')
 
-    emre.set_password("emre123")
-    suheyl.set_password("suhul123")
+    emre.set_password("123123")
+    suheyl.set_password("123123")
+    merdo.set_password("123123")
 
     emre.save()
     suheyl.save()
+    merdo.save()
 
     emre.follow(suheyl)
+    emre.follow(merdo)
+    suheyl.follow(emre)
+    suheyl.follow(merdo)
 
-    print(emre.check_password("keo123"))
-    print(emre.check_password("emre123"))
 
-    emre.username = 'KadirEmreOto'
-    emre.save()
-
-    message = Message(_from=emre, _to=suheyl, content='Test Message 123')
+    message = Message(_from=emre, _to=suheyl, content='Hello suheyl')
     message.save()
 
     Message(_from=emre, _to=suheyl, content='Test Message2 123', read=1).save()
     Message(_from=suheyl, _to=emre, content='Test Message3 123', read=1).save()
     Message(_from=emre, _to=emre, content='Test Message4 123', read=1).save()
 
-    recipe1 = Recipe(name='Kuru Fasülye', description='Mertcaaaaan', _user=emre)
-    recipe2 = Recipe(name='Cacık', description='Short Description 3', _user=emre)
+    recipe1 = Recipe(name='Kuru Fasulye', description="""Ayıkladığınız kuru fasulyeleri bir gece önceden ılık suya basın.
+Kuru soğanı küçük küpler halinde yemeklik doğrayın. Ortadan ikiye kesip çekirdeklerini çıkardığınız renkli biberleri 
+soğanlarla uyumlu olacak büyüklükte doğrayın. Ayçiçek yağını derin bir tencerede kızdırın. Kuru soğanları ekleyip hafif
+ bir renk alana kadar kavurun. Doğranmış renkli biberler, biber ve domates salçasını ekleyip kısa süre daha kavurma 
+ işlemini sürdürün. Tatlı toz kırmızı biber ilavesiyle tatlandırın. Önceden suda bekletip suyunu süzdürdüğünüz kuru 
+ fasulyeleri ekleyip karıştırın. Kuru fasulyelerin üzerini az miktarda geçecek kadar su ekleyip kısık ateşte fasulyeler 
+ yumuşayana kadar pişirin. Pişirme işleminin sonuna doğru tuz ekleyin. Kıvam alan kuru fasulyeyi arzuya göre sıcak ya 
+ da soğuk olarak sevdiklerinizle paylaşın.""", _user=merdo)
+
+    recipe2 = Recipe(name='Cacık', description="""
+    Bol suda yıkayıp kuruladığınız salatalıkların uç kısımlarını kestikten sonra kabuklarını alacalı şekilde soyun.
+Salatalıkları küçük küpler halinde kesin, arzuya göre rendenin kalın tarafıyla rendeleyin.
+Küçük parçalar halinde kestiğiniz sarımsakları tuz ilavesiyle havanda ezin. Dereotunu incecik kıyın.
+Salatalık küpleri, ezilmiş sarımsak ve incecik kıyılmış dereotunu yoğurda katın. Azar azar eklediğiniz 
+soğuk suyla karıştırdığınız cacığın kıvamını ayarlayın. Servisi öncesinde zeytinyağı, sirke ve kuru nane ilave 
+ettiğiniz cacığı servis kaselerine paylaştırın. Bekletmeden sevdiklerinizle paylaşın.""", _user=emre)
     recipe3 = Recipe(name='Pilav', description='Short Description 2', _user=suheyl)
 
     recipe1.save()
     recipe2.save()
     recipe3.save()
 
-    fasulye = Ingredient(recipe=recipe1, amount='100 gr', name='Fasülye')
-    domates = Ingredient(recipe=recipe1, amount='3 adet', name='Domates')
-    biber = Ingredient(recipe=recipe1, amount='5 adet', name='Biber')
+    Ingredient(recipe=recipe1, amount='500 gr', name='Kuru fasulye').save()
+    Ingredient(recipe=recipe1, amount='4 yemek kaşığı', name='Ayçiçek yağı').save()
+    Ingredient(recipe=recipe1, amount='1 adet', name='Kuru soğan').save()
+    Ingredient(recipe=recipe1, amount='2 adet', name='Biber').save()
+    Ingredient(recipe=recipe1, amount='1/2 yemek kaşığı', name='Salça').save()
+    Ingredient(recipe=recipe1, amount='3 su bardağı', name='Su').save()
 
     salatalik = Ingredient(recipe=recipe2, amount='3 adet', name='Salatalık')
     yogurt = Ingredient(recipe=recipe2, amount='300 ml', name='Yoğurt')
@@ -59,18 +77,14 @@ def initdb():
     pirinc = Ingredient(recipe=recipe3, amount='1 kase', name='Pirinç')
     su = Ingredient(recipe=recipe3, amount='1L', name='Su')
 
-    fasulye.save()
-    domates.save()
-    biber.save()
     salatalik.save()
     yogurt.save()
     pirinc.save()
     su.save()
 
     comments = [
-        Comment(_user=suheyl, recipe=recipe1, text='such a great recipe!'),
-        Comment(_user=emre, recipe=recipe1, text='this is bad'),
-        Comment(_user=suheyl, recipe=recipe1, text='nononono'),
+        Comment(_user=suheyl, recipe=recipe1, text='Thanks for the recipe, Merdo!'),
+        Comment(_user=emre, recipe=recipe1, text='Kuru fasulye is the best.'),
         Comment(_user=suheyl, recipe=recipe2, text='such a great recipe!'),
         Comment(_user=emre, recipe=recipe2, text='this is bad'),
         Comment(_user=suheyl, recipe=recipe3, text='nononono'),
@@ -260,7 +274,7 @@ def recipes_page():
 
         for name, amount in zip(names, amounts):
             if len(name) < 2 or len(name) >= 20 \
-                    or len(amount) < 1 or len(amount) >= 10:
+                    or len(amount) < 1 or len(amount) >= 50:
                 return redirect('cookbook:recipes_page')
             ingredients.append(Ingredient(name=name, amount=amount, recipe=recipe))
 

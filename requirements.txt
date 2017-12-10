@@ -2,3 +2,5 @@ Flask
 psycopg2
 werkzeug
 flask-login
+sphinx
+sphinx-autobuild
