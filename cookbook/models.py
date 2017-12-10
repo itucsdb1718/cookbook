@@ -36,6 +36,8 @@ class Users(UserMixin, Model):
     def follow(self, user):
         if isinstance(user, self.__class__):
             user = user.id
+
+        user = int(user)
         if self.id == user:
             return
 
@@ -53,6 +55,8 @@ class Users(UserMixin, Model):
     def unfollow(self, user):
         if isinstance(user, self.__class__):
             user = user.id
+
+        user = int(user)
         if self.id == user:
             return
 
