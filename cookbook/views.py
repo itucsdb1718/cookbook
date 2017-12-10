@@ -1,6 +1,5 @@
 import os
 import json
-import datetime
 
 from flask.helpers import url_for
 from flask import render_template, redirect, flash, abort, Response
@@ -98,6 +97,7 @@ def initdb():
         n.save()
 
     return redirect(url_for('cookbook.home_page'))
+
 
 @login_required
 def home_page():
@@ -360,7 +360,9 @@ def notification(id):
 
 def login():
     if request.method == 'POST':
-        error = None
+        if current_user.is_authenticated:
+            flash('You are already logged in!')
+            return redirect(url_for('cookbook.home_page'))
 
         username = request.form.get('username', 'x')
         password = request.form.get('password', 'x')
@@ -370,20 +372,22 @@ def login():
         if users and users[0].check_password(password):
             login_user(users[0])
             flash('You were successfully logged in')
-            return redirect(request.referrer)
+            return redirect(url_for('cookbook.profile'))
 
         else:
             flash('Username or password incorrect')
-            return redirect(url_for('cookbook.home_page'))
+            return redirect(url_for('cookbook.login'))
 
-    return redirect(url_for('cookbook.profile_page'))
+    else:
+        return render_template('login.html')
 
 
 def logout():
     if current_user is not None:
         logout_user()
 
-    return redirect(url_for('cookbook.home_page'))
+    return redirect(url_for('cookbook.login'))
+
 
 def register():
     if request.method == 'POST' and current_user.is_anonymous:
@@ -394,12 +398,12 @@ def register():
                 or request.form.get('password', '1') != request.form.get('password2', '2') \
                 or 3 > len(request.form.get('password', '')):
             flash('Invalid form')
-            return redirect(url_for('cookbook.home_page'))
+            return redirect(url_for('cookbook.login'))
 
         user = Users.get(limit=1, username=username)
         if user:
             flash('Username taken')
-            return redirect(url_for('cookbook.home_page'))
+            return redirect(url_for('cookbook.login'))
 
         user = Users(username=username,
                      firstname=request.form.get('first-name', ''),
@@ -412,9 +416,9 @@ def register():
         except IntegrityError as e:
             flash('Form invalid')
             print(e)
-            return redirect(url_for('cookbook.home_page'))
+            return redirect(url_for('cookbook.login'))
 
         login_user(user)
-        return redirect(request.referrer)
+        return redirect(url_for('cookbook.profile'))
 
-    return redirect(url_for('cookbook.home_page'))
+    return redirect(url_for('cookbook.login'))

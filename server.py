@@ -58,7 +58,7 @@ def utility_processor():
   
 @login_manager.unauthorized_handler
 def unauthorized():
-    return redirect(url_for('cookbook.home_page'))
+    return redirect(url_for('cookbook.login'))
 
 
 if __name__ == '__main__':
