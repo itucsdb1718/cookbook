@@ -170,6 +170,7 @@ def unfollow(user_id):
     return redirect(request.referrer)
 
 
+@login_required
 def message_page(username):
     to = Users.get(limit=1, username=username)
     if not to:
@@ -277,7 +278,7 @@ def recipes_page():
         if len(names) != len(amounts):
             return redirect('cookbook:recipes_page')
 
-        for name, amount in zip(names,amounts):
+        for name, amount in zip(names, amounts):
             if len(name) < 2 or len(name) >= 20 \
                     or len(amount) < 1 or len(amount) >= 10:
                 return redirect('cookbook:recipes_page')
@@ -393,6 +394,7 @@ def login():
         if users and users[0].check_password(password):
             login_user(users[0])
             flash('You were successfully logged in')
+
             return redirect(url_for('cookbook.profile_page', username=current_user.username))
 
         else:
@@ -440,6 +442,8 @@ def register():
             return redirect(url_for('cookbook.login'))
 
         login_user(user)
+
         return redirect(url_for('cookbook.profile_page', username=current_user.username))
+
 
     return redirect(url_for('cookbook.login'))

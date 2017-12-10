@@ -34,7 +34,9 @@ class Users(UserMixin, Model):
         return self.id
 
     def follow(self, user):
-        if (isinstance(user, self.__class__) and self.id == user.id) or self.id == int(user):
+        if isinstance(user, self.__class__):
+            user = user.id
+        if self.id == user:
             return
 
         relation = Relation.get(limit=1, _from=self, _to=user)
@@ -49,7 +51,9 @@ class Users(UserMixin, Model):
                          content="click to see {}'s profile".format(current_user.username)).save()
 
     def unfollow(self, user):
-        if (isinstance(user, self.__class__) and self.id == user.id) or self.id == int(user):
+        if isinstance(user, self.__class__):
+            user = user.id
+        if self.id == user:
             return
 
         relation = Relation.get(limit=1, _from=self, _to=user)
