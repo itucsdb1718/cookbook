@@ -13,7 +13,7 @@ cookbook.add_url_rule('/unfollow/<user_id>/', view_func=views.unfollow)
 cookbook.add_url_rule('/messages/<username>/', view_func=views.message_page)
 cookbook.add_url_rule('/new_messages/<username>/', view_func=views.new_messages)
 cookbook.add_url_rule('/view_message/', view_func=views.view_message, methods=['POST'])
-cookbook.add_url_rule('/add_mesaage/', view_func=views.add_message, methods=['POST'])
+cookbook.add_url_rule('/add_message/', view_func=views.add_message, methods=['POST'])
 
 cookbook.add_url_rule('/notification/<id>/', view_func=views.notification)
 
