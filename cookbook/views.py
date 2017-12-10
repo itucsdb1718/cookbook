@@ -108,11 +108,25 @@ def home_page():
 @login_required
 def add_comment():
     if request.method == 'POST':
-
         if request.form.get('recipe', None) and request.form.get('text', None):
             recipe_id = int(request.form['recipe'].split('-')[1])
+
+            recipe = Recipe.get(limit=1, id=recipe_id, select_related='_user')
+
+            if not recipe:
+                return Response('failure')
+
+            recipe = recipe[0]
+
             comment = Comment(_user=current_user, recipe=recipe_id, text=request.form['text'])
             comment.save()
+
+            if current_user.id != recipe._user.id:
+                Notification(_from=current_user, _to=recipe._user,
+                             link=url_for('cookbook.recipe_page', recipe_id=recipe_id),
+                             title='{} left a comment on your recipe!'.format(current_user.username),
+                             content=request.form['text']).save()
+
             return Response('success')
         return Response('failure')
 
@@ -221,7 +235,7 @@ def view_message():
 
 @login_required
 def add_message():
-    print(request.form, '*'*10)
+
     if 'id' not in request.form or 'content' not in request.form:
         abort(404)
 
@@ -235,6 +249,12 @@ def add_message():
     message = Message(_from=current_user, _to=to, content=request.form['content'])
     message.save()
 
+    Notification(_from=current_user, _to=to, link=url_for('cookbook.message_page', username=current_user.username),
+                 title='You have a new message!', content=request.form['content']).save()
+
+    print('*'*10)
+    print('CONTENT:', N.content)
+    print('*' * 10)
     return 'true'
 
 
@@ -374,7 +394,8 @@ def login():
         if users and users[0].check_password(password):
             login_user(users[0])
             flash('You were successfully logged in')
-            return redirect(url_for('cookbook.home_page'))
+
+            return redirect(url_for('cookbook.profile_page', username=current_user.username))
 
         else:
             flash('Username or password incorrect')
@@ -421,6 +442,8 @@ def register():
             return redirect(url_for('cookbook.login'))
 
         login_user(user)
-        return redirect(url_for('cookbook.home_page'))
+
+        return redirect(url_for('cookbook.profile_page', username=current_user.username))
+
 
     return redirect(url_for('cookbook.login'))

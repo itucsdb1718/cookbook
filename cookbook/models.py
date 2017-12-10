@@ -2,6 +2,7 @@ from collections import defaultdict
 from .abstract import *
 from hashlib import md5
 
+from flask import url_for
 from flask_login import UserMixin
 
 
@@ -43,6 +44,11 @@ class Users(UserMixin, Model):
         if not relation:
             relation = Relation(_from=self, _to=user)
             relation.save()
+
+            Notification(_from=current_user, _to=user,
+                         link=url_for('cookbook.profile_page', username=current_user.username),
+                         title='{} is following you!'.format(current_user.username),
+                         content="click to see {}'s profile".format(current_user.username)).save()
 
     def unfollow(self, user):
         if isinstance(user, self.__class__):
