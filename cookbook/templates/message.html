@@ -33,15 +33,15 @@
     <script src="{{ url_for('cookbook.static', filename='js/message.js') }}"></script>
 
     <script>
-        var loaded = false;
         function mark_as_read(message_id) {
             $.ajax({
                 url: "{{ url_for("cookbook.view_message") }}",
                 type: "POST",
                 data: {
-                  _id: message_id // various ways to store the ID, you can choose
+                  _id: message_id
                 }
             });
+
         }
 
         function create_message(user_id, content) {
@@ -72,13 +72,10 @@
                 addMessage({who: "you", text: "{{ message.content }}", time: "{{ message.created_at }}",
                             picture: "{{ url_for('cookbook.uploads', filename=message._from.picture) }}",
                             viewed: {{ message.read }} });
-                mark_as_read({{ message._to.id }});
             </script>
 
 
         {% endif %}
-
-        <script>loaded = true;</script>
 
     {% endfor %}
 
@@ -101,26 +98,24 @@
         var myVar = setInterval(myTimer, 3000);
 
         function myTimer() {
-            if (loaded) {
-                $.ajax({
-                    url: '/new_messages/{{ to.username }}/',
-                    dataType: 'json',
-                    success: function (response) {
-                        for (i = 0; i < response.length; i++) {
-                            if (response[i]['from'] !== 'me') {
-                                addMessage({
-                                    who: response[i]['from'], text: response[i]['content'],
-                                    time: response[i]['time'],
-                                    picture: response[i]['picture'],
-                                    viewed: 0
-                                });
+            $.ajax({
+                url: '/new_messages/{{ to.username }}/',
+                dataType: 'json',
+                success: function (response) {
+                    for (i = 0; i < response.length; i++) {
+                        if (response[i]['from'] !== 'me') {
+                            addMessage({
+                                who: response[i]['from'], text: response[i]['content'],
+                                time: response[i]['time'],
+                                picture: response[i]['picture'],
+                                viewed: 0
+                            });
 
-                                mark_as_read(response[i]['id']);
-                            }
+                            mark_as_read(response[i]['id']);
                         }
                     }
-                });
-            }
+                }
+            });
         }
     </script>
 

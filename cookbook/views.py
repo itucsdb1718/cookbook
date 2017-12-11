@@ -180,6 +180,9 @@ def message_page(username):
     messages = Message.get_messages(current_user, to)
     for message in messages:
         message.created_at = message.created_at.strftime("%m.%d.%Y %H:%M")
+        if message.read == 0:
+            message.read = 1
+            message.save()
 
     return render_template('message.html', **locals())
 
