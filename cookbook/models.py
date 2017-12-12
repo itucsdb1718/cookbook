@@ -47,10 +47,10 @@ class Users(UserMixin, Model):
             relation = Relation(_from=self, _to=user)
             relation.save()
 
-            Notification(_from=current_user, _to=user,
-                         link=url_for('cookbook.profile_page', username=current_user.username),
-                         title='{} is following you!'.format(current_user.username),
-                         content="click to see {}'s profile".format(current_user.username)).save()
+            Notification(_from=self, _to=user,
+                         link=url_for('cookbook.profile_page', username=self.username),
+                         title='{} is following you!'.format(self.username),
+                         content="click to see {}'s profile".format(self.username)).save()
 
     def unfollow(self, user):
         if isinstance(user, self.__class__):
