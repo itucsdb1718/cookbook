@@ -4,28 +4,33 @@ Developer Guide
 Database Design
 ---------------
 
-**explain the database design of your project**
+**Our database contains 7 tables. Users is the main table and used for authentication.**
 
-**include the E/R diagram(s)**
+   .. figure:: img/diagram.png
+      :scale: 100 %
+      :alt: map to buried treasure
+
+      `Database diagram.`
 
 Code
 ----
 
 **explain the technical structure of your code**
 
-**to include a code listing, use the following example**::
+.. automodule:: cookbook.abstract
+    :members:
+    :undoc-members:
+    :member-order: bysource
 
-   .. code-block:: python
+.. code-block:: python
 
-      class Foo:
+  class Foo:
 
-         def __init__(self, x):
-            self.x = x
+     def __init__(self, x):
+        self.x = x
 
 .. toctree::
 
-   member1
-   member2
-   member3
-   member4
-   member5
+   Süheyl Emre Karabela
+   Kadir Emre Oto
+

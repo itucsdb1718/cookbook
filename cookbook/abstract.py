@@ -4,6 +4,9 @@ from flask_login import current_user
 
 
 class Model(object):
+    """
+    Base class for all models.
+    """
     id = 0
 
     def __init__(self, **kwargs):

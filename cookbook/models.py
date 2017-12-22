@@ -119,14 +119,23 @@ class Message(Model):
 
 
 class Recipe(Model):
-    name = CharField(max_length=50)
-    _user = ForeignKey(Users, on_delete='CASCADE')
-    description = CharField(max_length=1000)
-    created_at = DateTimeField(auto_now=True)
+    """
+    Model representing the recipe table
+    """
+
+    name = CharField(max_length=50) #: Name of the recipe
+    _user = ForeignKey(Users, on_delete='CASCADE') #: User which the recipe belongs to
+    description = CharField(max_length=1000) #: description of the recipe
+    created_at = DateTimeField(auto_now=True) #: recipe create date
 
     @classmethod
     def get_followings_posts(cls, _user):
+        """
+        Special SQL query for fetching the recipes of the user's followings to show on the home page
 
+        :param Users _user: The user which the recipes will be fetched
+        :return: A list of recipe objects with their ingredients and comments
+        """
         recipe_fields = Recipe.get_fields(prefix=True)
         user_fields = Users.get_fields(prefix=True)
         ingredient_fields = Ingredient.get_fields(prefix=True)
@@ -199,9 +208,12 @@ class Recipe(Model):
 
 
 class Ingredient(Model):
-    name = CharField(max_length=50)
-    amount = CharField(max_length=50)
-    recipe = ForeignKey(Recipe, on_delete='CASCADE')
+    """
+    Represents an ingredient
+    """
+    name = CharField(max_length=50) #: name of the ingredient
+    amount = CharField(max_length=50) #: amount of the ingredient
+    recipe = ForeignKey(Recipe, on_delete='CASCADE') #: The recipe that the ingredient belongs to
 
 
 class Relation(Model):
@@ -210,10 +222,13 @@ class Relation(Model):
 
 
 class Comment(Model):
-    _user = ForeignKey(Users, on_delete='CASCADE')
-    recipe = ForeignKey(Recipe, on_delete='CASCADE')
-    text = CharField(max_length=140)
-    created_at = DateTimeField(auto_now=True)
+    """
+    Represents a comment
+    """
+    _user = ForeignKey(Users, on_delete='CASCADE') #: user that wrote the comment
+    recipe = ForeignKey(Recipe, on_delete='CASCADE') #: recipe that the comment is written to
+    text = CharField(max_length=140) #: Comment body
+    created_at = DateTimeField(auto_now=True) #: Creation date
 
 
 class Notification(Model):
