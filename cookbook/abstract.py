@@ -4,7 +4,10 @@ from flask_login import current_user
 
 
 class Model(object):
-    id = 0
+    """
+    Base class for all models.
+    """
+    id = 0 #: ID of the model
 
     def __init__(self, **kwargs):
         for name in kwargs:
@@ -12,6 +15,9 @@ class Model(object):
 
     @classmethod
     def create(cls):
+        """
+        Generates and executes the SQL command for creating the table
+        """
         statement = "CREATE TABLE {} ({});"
         items = cls.__dict__
 
@@ -35,6 +41,9 @@ class Model(object):
 
     @classmethod
     def drop(cls):
+        """
+        Drops the table
+        """
         statement = "DROP TABLE IF EXISTS " + cls.__name__ + " CASCADE"
 
         with dbapi2.connect(current_app.config['dsn']) as connection:
@@ -43,7 +52,14 @@ class Model(object):
             connection.commit()
 
     @classmethod
-    def get_fields(cls, prefix=None):
+    def get_fields(cls, prefix=False):
+        """
+        Helper function for getting the fields of the model
+
+        :param bool prefix: Controls whether the field name will be prefixed with the class name
+        :return: List of fields
+        :rtype: list
+        """
         return ['%s.id'%cls.__name__ if prefix else 'id'] + \
                ['%s.%s'%(cls.__name__, name) if prefix else name
                 for name in cls.__dict__ if hasattr(cls.__dict__[name], '__sql__')]
@@ -57,6 +73,8 @@ class Model(object):
         :type select_related: list, str
         :param prefetch: for joining with another model based on other's foreign key
         :type prefetch: ForeignKey
+        :return: List of model instances
+        :rtype: list
         """
         fields = cls.get_fields()
 
@@ -158,6 +176,9 @@ class Model(object):
         return output
 
     def save(self):
+        """
+        Saves the model instance to the database
+        """
         fields = self.__class__.__dict__
 
         keys = []
@@ -198,7 +219,9 @@ class Model(object):
         self.id = self.id if self.id else cursor.fetchone()[0]
 
     def delete(self):
-
+        """
+        Deletes the model instance from database
+        """
         if self.id == 0:
             return
 
@@ -211,6 +234,9 @@ class Model(object):
 
 
 class BaseField:
+    """
+    Base class for all fields.
+    """
     def __get__(self, instance, owner):
         if not instance:
             return self
@@ -225,6 +251,9 @@ class BaseField:
 
 
 class ForeignKey(BaseField):
+    """
+    Field representing a reference to another table
+    """
     def __init__(self, to, to_field=None, on_delete=None, on_update=None):
         self.to = to
         self.to_field = to_field
@@ -253,6 +282,9 @@ class ForeignKey(BaseField):
 
 
 class CharField(BaseField):
+    """
+    Field representing a VARCHAR
+    """
     def __init__(self, max_length, null=True, default=None):
         self.max_length = max_length
         self.null = null
@@ -268,6 +300,9 @@ class CharField(BaseField):
 
 
 class IntegerField(BaseField):
+    """
+    Field representing an INTEGER
+    """
     def __init__(self, size=None, null=True, default=None):
         self.size = size
         self.null = null
@@ -283,6 +318,9 @@ class IntegerField(BaseField):
 
 
 class FloatField(BaseField):
+    """
+    Field representing a FLOAT
+    """
     def __init__(self, size=None, null=True, default=None):
         self.size = size
         self.null = null
@@ -298,6 +336,9 @@ class FloatField(BaseField):
 
 
 class DateTimeField(BaseField):
+    """
+    Field representing a TIMESTAMP
+    """
     def __init__(self, auto_now=False, null=True, default=None):
         self.auto_now = auto_now
         self.null = null
