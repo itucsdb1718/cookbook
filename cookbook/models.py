@@ -7,15 +7,21 @@ from flask_login import UserMixin
 
 
 class Users(UserMixin, Model):
-    username = CharField(max_length=50, null=False)
-    firstname = CharField(max_length=50, null=False, default='-')
-    lastname = CharField(max_length=50, null=False)
-    email = CharField(max_length=80, null=False)
-    password = CharField(max_length=32, null=False)  # hash of password
-    picture = CharField(max_length=100, default='default_profile.png')
+    username = CharField(max_length=50, null=False)  #: username of the user
+    firstname = CharField(max_length=50, null=False, default='-')  #: firstname of the user
+    lastname = CharField(max_length=50, null=False)  #: lasname of the user
+    email = CharField(max_length=80, null=False)  #: email of the user
+    password = CharField(max_length=32, null=False)  #: hash of password
+    picture = CharField(max_length=100, default='default_profile.png')  #: path of profile picture
 
     @staticmethod
     def create_hash(password):
+        """
+        generates a hash of password using md5 algorithm
+
+        :param str password:
+        :return: hash of password
+        """
         password = password.encode()
 
         a = md5(password).hexdigest()
@@ -25,15 +31,31 @@ class Users(UserMixin, Model):
         return md5(c).hexdigest()
 
     def set_password(self, password):
+        """
+        calls the create_hash method and changes the hash of password
+
+        :param str password:
+        """
         self.password = Users.create_hash(password)
 
     def check_password(self, password):
+        """
+        checks if the given password is correct or not
+
+        :param str password:
+        :return: True if given password is correct, otherwise False
+        """
         return Users.create_hash(password) == self.password
 
     def get_id(self):
         return self.id
 
     def follow(self, user):
+        """
+        follows the given user if follow-relation does not exist between users
+
+        :param Users user:
+        """
         if isinstance(user, self.__class__):
             user = user.id
 
@@ -53,6 +75,11 @@ class Users(UserMixin, Model):
                          content="click to see {}'s profile".format(self.username)).save()
 
     def unfollow(self, user):
+        """
+        unfollows the given user if the user is following
+
+        :param Users user:
+        """
         if isinstance(user, self.__class__):
             user = user.id
 
@@ -66,25 +93,34 @@ class Users(UserMixin, Model):
             relation[0].delete()
 
     def get_followers(self):
+        """
+        lists the followers
+        """
         followers = Relation.get(limit=None, _to=self, select_related=('_from', '_to'))
         return followers
 
     def get_followings(self):
+        """
+        lists the followings
+        """
         followings = Relation.get(limit=None, _from=self, select_related=('_from', '_to'))
         return followings
 
 
 class Message(Model):
-    _from = ForeignKey(Users, on_delete='CASCADE')
-    _to = ForeignKey(Users, on_delete='CASCADE')
-    created_at = DateTimeField(auto_now=True)
-    content = CharField(max_length=1000)
-    read = IntegerField(default=0)
+    _from = ForeignKey(Users, on_delete='CASCADE')  #: The user who sent the message
+    _to = ForeignKey(Users, on_delete='CASCADE')  #: The user who will recieve the message
+    created_at = DateTimeField(auto_now=True)  #: the creation date of message
+    content = CharField(max_length=1000)  #: message content
+    read = IntegerField(default=0)  #: 1 if the message is viewed, otherwise 0
 
     @staticmethod
     def get_messages(user1, user2, new=False):
         """
-        Special query to fetch messages between users
+        Special query to fetch messages between given users.
+
+        :param Users user1:
+        :param Users user2:
         :param new: True if just new messages are needed; otherwise False
         :return: all messages between user1 and user2
         """
@@ -217,8 +253,8 @@ class Ingredient(Model):
 
 
 class Relation(Model):
-    _from = ForeignKey(Users, on_delete='CASCADE')
-    _to = ForeignKey(Users, on_delete='CASCADE')
+    _from = ForeignKey(Users, on_delete='CASCADE')  #: the user who follows
+    _to = ForeignKey(Users, on_delete='CASCADE')  #: the user who is following
 
 
 class Comment(Model):
@@ -232,11 +268,11 @@ class Comment(Model):
 
 
 class Notification(Model):
-    _from = ForeignKey(Users, on_delete='CASCADE')
-    _to = ForeignKey(Users, on_delete='CASCADE')
+    _from = ForeignKey(Users, on_delete='CASCADE')  #: the user who cause the notification
+    _to = ForeignKey(Users, on_delete='CASCADE')  #: the user who recieve the notification
 
-    link = CharField(max_length=70)
-    title = CharField(max_length=50)
-    content = CharField(max_length=140)
-    read = IntegerField(default=0)
-    created_at = DateTimeField(auto_now=True)
+    link = CharField(max_length=70)  #: holds the related page url with notification
+    title = CharField(max_length=50)  #: the title of the notification
+    content = CharField(max_length=140)  #: the content of the notification
+    read = IntegerField(default=0)  #: 1 if notification is viewed, else 0
+    created_at = DateTimeField(auto_now=True)  #: the creation date of notification
