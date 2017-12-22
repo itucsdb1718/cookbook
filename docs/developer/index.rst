@@ -15,19 +15,12 @@ Database Design
 Code
 ----
 
-**explain the technical structure of your code**
+**We used a base class for easily generating SQL commands without code repetition.**
 
 .. automodule:: cookbook.abstract
     :members:
     :undoc-members:
     :member-order: bysource
-
-.. code-block:: python
-
-  class Foo:
-
-     def __init__(self, x):
-        self.x = x
 
 .. toctree::
 
