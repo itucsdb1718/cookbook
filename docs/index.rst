@@ -1,17 +1,15 @@
-Welcome to itucsdb's documentation!
+Welcome to cookbook's documentation!
 ===================================
 
-:Team: Team Name
+:Team: Cookbook
 
 :Members:
 
-   * Member 1
-   * Member 2
-   * Member 3
-   * Member 4
-   * Member 5
+   * Süheyl Emre Karabela
+   * Kadir Emre Oto
 
-**project description goes here (a few paragraphs)**
+**This is an application where users can add cooking recipes, follow other people**
+**to see their recipes, comment on recipes and send messages to other users.**
 
 Contents:
 

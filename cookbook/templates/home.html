@@ -2,8 +2,25 @@
 {% block title %}Home{% endblock %}
 {% block content %}
 
+{% if not recipes %}
+<div class="gap"></div>
+<div class="gap"></div>
+<div class="gap"></div>
+<div class="gap"></div>
+<div class="gap"></div>
+<h1 class="text-center">You have no followings :(</h1>
+<div class="gap"></div>
+<div class="gap"></div>
+<div class="gap"></div>
+<div class="gap"></div>
+<div class="gap"></div>
+<div class="gap"></div>
+<div class="gap"></div>
+<div class="gap"></div>
+<div class="gap"></div>
+<div class="gap"></div>
+{% endif %}
 <div class="gap-small"></div>
-
 {% for recipe in recipes %}
     <div class="row">
         <div class="col-md-6 col-md-offset-3">

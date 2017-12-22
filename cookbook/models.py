@@ -199,8 +199,8 @@ class Recipe(Model):
 
 
 class Ingredient(Model):
-    name = CharField(max_length=20)
-    amount = CharField(max_length=10)
+    name = CharField(max_length=50)
+    amount = CharField(max_length=50)
     recipe = ForeignKey(Recipe, on_delete='CASCADE')
 
 
